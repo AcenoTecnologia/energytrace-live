@@ -1,10 +1,8 @@
-# EnergyTrace LiveMode Tool V2
+# EnergyTrace Live
 
 A Python-based tool to automate **Texas Instruments EnergyTrace** measurements using TI `stune`, capture current consumption from a TI LaunchPad/XDS110, and display the data in real time.
 
-Version 2 replaces the original Windows `.bat` workflow with a Python runner. The project is designed to work on **Windows** and **native Linux** when a valid Code Composer Studio installation and XDS110 debug probe are available.
-
-> **WSL note:** running EnergyTrace through WSL is experimental. The XDS110 may appear in `lsusb`, but EnergyTrace can still fail to open the debug probe handle because USB/IP may not expose all probe interfaces required by `stune`.
+The project is designed to work on **Windows** and **native Linux** when a valid Code Composer Studio installation and XDS110 debug probe are available.
 
 ---
 
@@ -16,7 +14,6 @@ Version 2 replaces the original Windows `.bat` workflow with a Python runner. Th
 - [Requirements](#requirements)
   - [Software](#software)
   - [Python Packages](#python-packages)
-  - [Linux System Dependencies](#linux-system-dependencies)
 - [Installation](#installation)
   - [Windows](#windows-installation)
   - [Linux](#linux-installation)
@@ -28,7 +25,6 @@ Version 2 replaces the original Windows `.bat` workflow with a Python runner. Th
   - [Windows](#windows)
   - [Linux](#linux)
 - [Command-Line Parameters](#command-line-parameters)
-- [EnergyTrace Settings](#energytrace-settings)
 - [Warm-up Routine](#warm-up-routine)
 - [Live Plot](#live-plot)
   - [Controls](#controls)
@@ -88,8 +84,6 @@ The scripts can be placed in any directory, as long as both files are kept toget
   - current-band analysis.
 - Stores CSV files, logs, and generated `stune` command files in timestamped output folders.
 - Accepts CCS path, target configuration, device, duration, window, refresh rate, and EnergyTrace mode from the command line.
-- Adds the required CCS paths to the runtime environment automatically.
-- On Linux, can dynamically add required CCS `.so` library folders to `LD_LIBRARY_PATH`.
 
 ---
 
@@ -129,7 +123,7 @@ pip install numpy pandas matplotlib PyQt6
 
 ## Installation
 
-### Windows Installation
+### Windows
 
 Install Code Composer Studio normally.
 
@@ -152,7 +146,7 @@ C:\ti\ccs2051
 C:\ti\ccs2051\ccs
 ```
 
-### Linux Installation
+### Linux
 
 Install CCS for Linux.
 
@@ -314,11 +308,7 @@ python run_energytrace_live.py \
 | `--refresh` | Live plot refresh time in milliseconds. |
 | `--window` | Visible plot window in seconds. Use `0` to show the full capture. |
 | `--max-points` | Maximum number of points displayed in the live plot. |
-| `--et-mode` | EnergyTrace mode passed to `stune`. Usually `et`. |
-
----
-
-## EnergyTrace Settings
+| `--et-mode` | EnergyTrace mode passed to `stune`. Usually `et`, the `et++` mode may not work for some devices. |
 
 Typical default values:
 
@@ -341,7 +331,7 @@ The sample frequency parameter is not used by this program because some devices 
 
 ## Warm-up Routine
 
-The runner can perform short warm-up captures before the real acquisition.
+The runner performs short warm-up captures before the real acquisition.
 
 This helps reduce cases where EnergyTrace reports:
 
@@ -624,7 +614,7 @@ python -c "from PyQt6.QtWidgets import QApplication, QLabel; app=QApplication([]
 ## Limitations
 
 - The project depends on TI `stune`.
-- EnergyTrace+ mode may not work depending on the device and target configuration.
+- EnergyTrace++ mode may not work depending on the device and target configuration.
 - The sample frequency parameter is not used because some devices use a fixed EnergyTrace sampling rate.
 - WSL support is experimental and may fail even when the XDS110 appears in `lsusb`.
 - XDS110 firmware compatibility is controlled by the TI XDS software stack included with the selected CCS version.
