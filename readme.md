@@ -491,6 +491,7 @@ Downsampling is used only for plotting performance. Raw data should be used for 
 The EnergyTrace feature in CCS 20 requires an active debug connection to the target device. Therefore, the measured current and power may be higher than those obtained with EnergyTrace Live, since the debug interface and related circuitry can contribute to the overall power consumption.
 
 Older CCS versions (e.g., CCS v12.x) provide an EnergyTrace implementation that can operate without an active debug session, resulting in measurements that are expected to be closer to those obtained with EnergyTrace Live.
+
 ---
 
 ## Common Issues
