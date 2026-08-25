@@ -106,7 +106,7 @@ out/YYYYMMDD_HHMMSS/
 ### Software
 
 - Python 3.8 or newer.
-- Texas Instruments Code Composer Studio (it was tested with 20.51 and 21.00).
+- Texas Instruments Code Composer Studio (it was tested with CCS 12.81, 20.51 and 21.00).
 - TI `stune`, installed with CCS.
 - TI LaunchPad/XDS110 with EnergyTrace support.
 - A valid `.ccxml` target configuration file.
