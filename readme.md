@@ -33,6 +33,7 @@ The project is designed to work on **Windows** and **native Linux** when a valid
   - [Point Analysis](#point-analysis)
 - [Output Files](#output-files)
 - [Notes About Sampling and Calculations](#notes-about-sampling-and-calculations)
+- [Notes About CCS 20 and CCS 12](#notes-about-ccs-20-and-ccs-12)
 - [Platform Notes](#platform-notes)
   - [Windows](#windows-1)
   - [Native Linux](#native-linux)
@@ -483,6 +484,13 @@ Energy is calculated by numerical integration of power over time.
 
 Downsampling is used only for plotting performance. Raw data should be used for energy, average, min, max, and interval calculations.
 
+---
+
+## Notes About CCS 20 and CCS 12
+
+The EnergyTrace feature in CCS 20 requires an active debug connection to the target device. Therefore, the measured current and power may be higher than those obtained with EnergyTrace Live, since the debug interface and related circuitry can contribute to the overall power consumption.
+
+Older CCS versions (e.g., CCS v12.x) provide an EnergyTrace implementation that can operate without an active debug session, resulting in measurements that are expected to be closer to those obtained with EnergyTrace Live.
 ---
 
 ## Common Issues
