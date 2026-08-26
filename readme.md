@@ -241,6 +241,7 @@ Make sure `--device` and `--config` refer to the same hardware target.
 | `--config`, `--target-config` | Path to the `.ccxml` target configuration file. |
 | `--device` | Device name passed to `stune`, for example `CC1352`. |
 | `--voltage` | Fallback voltage used only if the EnergyTrace CSV does not contain voltage data. |
+| `--battery-capacity` | Battery capacity in mAh used to estimate battery lifetime from the measured average current. |
 | `--duration` | Capture duration in milliseconds. Use `0` for indefinite capture. |
 | `--downsample` | Downsample window in milliseconds used only for plotting. |
 | `--refresh` | Live plot refresh time in milliseconds. |
@@ -253,6 +254,7 @@ Typical default values:
 ```python
 DEFAULT_DEVICE = "CC1352"
 DEFAULT_VOLTAGE = 3.3
+DEFAULT_BATTERY_CAPACITY_MAH = 0.0
 DEFAULT_DURATION_MS = 0.0
 DEFAULT_DOWNSAMPLE_MS = 0.01
 DEFAULT_REFRESH_MS = 10
@@ -277,12 +279,11 @@ Basic example:
 py run_energytrace_live.py ^
   --ccs "C:\ti\ccs2051" ^
   --config "C:\ti\workspace_ccstheia\zed_sw_CC1352P_2_LAUNCHXL_tirtos7_ticlang\targetConfigs\CC1352P1F3.ccxml" ^
-  --device CC1352
-```
+  --device CC1352```
 
 Will generate:
 
-```bat
+```bash
 =========================================================
 EnergyTrace LiveMode Runner
 =========================================================
@@ -318,6 +319,7 @@ py run_energytrace_live.py ^
   --refresh 10 ^
   --max-points 2000 ^
   --et-mode et
+  --battery-capacity 2000
 ```
 
 ### Linux

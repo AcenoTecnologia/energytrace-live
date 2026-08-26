@@ -329,6 +329,7 @@ def main():
     parser.add_argument("--folder", required=True)
     parser.add_argument("--prefix", required=True)
     parser.add_argument("--voltage", type=float, default=3.3)
+    parser.add_argument("--battery-capacity", type=float, default=0.0)
     parser.add_argument("--refresh-ms", type=int, default=1000)
     parser.add_argument("--downsample-ms", type=float, default=10.0)
     parser.add_argument("--window-s", type=float, default=0.0)
@@ -468,6 +469,17 @@ def main():
         print(f"  Energy in Interval:       {energy_interval_mJ:.6f} mJ")
         print(f"  Energy Start:             {e1:.6f} mJ")
         print(f"  Energy End:               {e2:.6f} mJ")
+        print()
+        print("Battery Lifetime")
+
+        if args.battery_capacity <= 0:
+            print("  Estimate:                 not calculated")
+        elif avg_current_mA <= 0:
+            print("  Estimate:                 unavailable (average current must be positive)")
+        else:
+            lifetime_h = args.battery_capacity / avg_current_mA
+            print(f"  Estimate:                 {lifetime_h:.6f} h")
+
         print("=========================================================")
 
 

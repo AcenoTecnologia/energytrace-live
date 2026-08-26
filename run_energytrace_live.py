@@ -58,6 +58,7 @@ STUNE_EXE = DEFAULT_STUNE_DIR / STUNE_EXE_NAME
 # Device settings
 DEFAULT_DEVICE = "CC1352"
 DEFAULT_VOLTAGE = 3.3
+DEFAULT_BATTERY_CAPACITY_MAH = 0.0
 
 # Duration in ms. Use 0 for indefinite capture.
 DEFAULT_DURATION_MS = 0.0
@@ -76,6 +77,7 @@ DEFAULT_SETTINGS = {
     "target_config": str(DEFAULT_CONFIG),
     "device": DEFAULT_DEVICE,
     "voltage": DEFAULT_VOLTAGE,
+    "battery_capacity": DEFAULT_BATTERY_CAPACITY_MAH,
     "duration": DEFAULT_DURATION_MS,
     "downsample": DEFAULT_DOWNSAMPLE_MS,
     "refresh": DEFAULT_REFRESH_MS,
@@ -99,6 +101,7 @@ SETTING_TYPES = {
     "target_config": str,
     "device": str,
     "voltage": float,
+    "battery_capacity": float,
     "duration": float,
     "downsample": float,
     "refresh": int,
@@ -194,6 +197,7 @@ def build_runtime_settings(args) -> dict:
         "target_config": args.target_config,
         "device": args.device,
         "voltage": args.voltage,
+        "battery_capacity": args.battery_capacity,
         "duration": args.duration,
         "downsample": args.downsample,
         "refresh": args.refresh,
@@ -582,6 +586,13 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--battery-capacity",
+        type=float,
+        default=None,
+        help="Battery capacity in mAh used to estimate battery lifetime."
+    )
+
+    parser.add_argument(
         "--duration",
         type=float,
         default=None,
@@ -639,6 +650,7 @@ def main() -> int:
 
     device = settings["device"]
     voltage = settings["voltage"]
+    battery_capacity_mAh = settings["battery_capacity"]
     duration_ms = settings["duration"]
     downsample_ms = settings["downsample"]
     refresh_ms = settings["refresh"]
@@ -692,6 +704,7 @@ def main() -> int:
     print()
     print(f"Device:          {device}")
     print(f"Voltage (V):     {voltage}")
+    print(f"Battery (mAh):   {battery_capacity_mAh}")
 
     if duration_ms > 0: print(f"Duration (ms):   {duration_ms}")
     else: print(f"Duration (ms):   indefinite (0)")
@@ -816,6 +829,8 @@ def main() -> int:
         f"energytrace_{ts}",
         "--voltage",
         str(voltage),
+        "--battery-capacity",
+        str(battery_capacity_mAh),
         "--refresh-ms",
         str(refresh_ms),
         "--downsample-ms",

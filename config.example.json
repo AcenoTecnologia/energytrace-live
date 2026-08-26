@@ -3,6 +3,7 @@
   "target_config": "C:/ti/workspace_ccstheia/zed_sw_CC1352P_2_LAUNCHXL_tirtos7_ticlang/targetConfigs/CC1352P1F3.ccxml",
   "device": "CCjson",
   "voltage": 5,
+  "battery_capacity": 2000,
   "duration": 2000,
   "downsample": 1,
   "refresh": 1000,
