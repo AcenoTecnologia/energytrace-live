@@ -21,10 +21,10 @@ The project is designed to work on **Windows** and **native Linux** when a valid
   - [CCS Path](#ccs-path)
   - [Target Configuration](#target-configuration)
   - [Device Name](#device-name)
+- [Command-Line Parameters](#command-line-parameters)
 - [Command-Line Usage](#command-line-usage)
   - [Windows](#windows)
   - [Linux](#linux)
-- [Command-Line Parameters](#command-line-parameters)
 - [Warm-up Routine](#warm-up-routine)
 - [Live Plot](#live-plot)
   - [Controls](#controls)
@@ -233,6 +233,40 @@ Make sure `--device` and `--config` refer to the same hardware target.
 
 ---
 
+## Command-Line Parameters
+
+| Parameter | Description |
+|---|---|
+| `--ccs` | Path to the CCS installation folder. It can point to the CCS root or directly to the `ccs` folder. |
+| `--config`, `--target-config` | Path to the `.ccxml` target configuration file. |
+| `--device` | Device name passed to `stune`, for example `CC1352`. |
+| `--voltage` | Fallback voltage used only if the EnergyTrace CSV does not contain voltage data. |
+| `--duration` | Capture duration in milliseconds. Use `0` for indefinite capture. |
+| `--downsample` | Downsample window in milliseconds used only for plotting. |
+| `--refresh` | Live plot refresh time in milliseconds. |
+| `--window` | Visible plot window in seconds. Use `0` to show the full capture. |
+| `--max-points` | Maximum number of points displayed in the live plot. |
+| `--et-mode` | EnergyTrace mode passed to `stune`. Usually `et`, the `et++` mode may not work for some devices. |
+
+Typical default values:
+
+```python
+DEFAULT_DEVICE = "CC1352"
+DEFAULT_VOLTAGE = 3.3
+DEFAULT_DURATION_MS = 0.0
+DEFAULT_DOWNSAMPLE_MS = 0.01
+DEFAULT_REFRESH_MS = 10
+DEFAULT_WINDOW_S = 0.0
+DEFAULT_MAX_POINTS = 2000
+DEFAULT_ET_MODE = "et"
+```
+
+The voltage value passed through `--voltage` is only used as a fallback. If the EnergyTrace CSV contains a voltage column, the voltage from the CSV is used instead.
+
+The sample frequency parameter is not used by this program because some devices use a fixed EnergyTrace sampling rate.
+
+---
+
 ## Command-Line Usage
 
 ### Windows
@@ -293,40 +327,6 @@ python run_energytrace_live.py \
   --max-points 2000 \
   --et-mode et
 ```
-
----
-
-## Command-Line Parameters
-
-| Parameter | Description |
-|---|---|
-| `--ccs` | Path to the CCS installation folder. It can point to the CCS root or directly to the `ccs` folder. |
-| `--config`, `--target-config` | Path to the `.ccxml` target configuration file. |
-| `--device` | Device name passed to `stune`, for example `CC1352`. |
-| `--voltage` | Fallback voltage used only if the EnergyTrace CSV does not contain voltage data. |
-| `--duration` | Capture duration in milliseconds. Use `0` for indefinite capture. |
-| `--downsample` | Downsample window in milliseconds used only for plotting. |
-| `--refresh` | Live plot refresh time in milliseconds. |
-| `--window` | Visible plot window in seconds. Use `0` to show the full capture. |
-| `--max-points` | Maximum number of points displayed in the live plot. |
-| `--et-mode` | EnergyTrace mode passed to `stune`. Usually `et`, the `et++` mode may not work for some devices. |
-
-Typical default values:
-
-```python
-DEFAULT_DEVICE = "CC1352"
-DEFAULT_VOLTAGE = 3.3
-DEFAULT_DURATION_MS = 0.0
-DEFAULT_DOWNSAMPLE_MS = 0.01
-DEFAULT_REFRESH_MS = 10
-DEFAULT_WINDOW_S = 0.0
-DEFAULT_MAX_POINTS = 2000
-DEFAULT_ET_MODE = "et"
-```
-
-The voltage value passed through `--voltage` is only used as a fallback. If the EnergyTrace CSV contains a voltage column, the voltage from the CSV is used instead.
-
-The sample frequency parameter is not used by this program because some devices use a fixed EnergyTrace sampling rate.
 
 ---
 
