@@ -242,6 +242,7 @@ Make sure `--device` and `--config` refer to the same hardware target.
 | `--device` | Device name passed to `stune`, for example `CC1352`. |
 | `--voltage` | Fallback voltage used only if the EnergyTrace CSV does not contain voltage data. |
 | `--battery-capacity` | Battery capacity in mAh used to estimate battery lifetime from the measured average current. |
+| `--no-plot` | Set to `1` to disable the live plot while keeping capture and analysis enabled. Default: `0`. |
 | `--duration` | Capture duration in milliseconds. Use `0` for indefinite capture. |
 | `--downsample` | Downsample window in milliseconds used only for plotting. |
 | `--refresh` | Live plot refresh time in milliseconds. |
@@ -255,6 +256,7 @@ Typical default values:
 DEFAULT_DEVICE = "CC1352"
 DEFAULT_VOLTAGE = 3.3
 DEFAULT_BATTERY_CAPACITY_MAH = 0.0
+DEFAULT_NO_PLOT = 0
 DEFAULT_DURATION_MS = 0.0
 DEFAULT_DOWNSAMPLE_MS = 0.01
 DEFAULT_REFRESH_MS = 10

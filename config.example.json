@@ -4,6 +4,7 @@
   "device": "CCjson",
   "voltage": 5,
   "battery_capacity": 2000,
+  "no_plot": 0,
   "duration": 2000,
   "downsample": 1,
   "refresh": 1000,

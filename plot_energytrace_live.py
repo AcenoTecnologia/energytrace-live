@@ -1,11 +1,27 @@
 import argparse
 import io
+import os
 import re
+import select
 import sys
+import time
 from pathlib import Path
 
 import matplotlib
-matplotlib.use("QtAgg")
+
+if os.name == "nt":
+    import msvcrt
+
+NO_PLOT_REQUESTED = any(
+    argument == "--no-plot=1"
+    or (
+        argument == "--no-plot"
+        and index + 1 < len(sys.argv)
+        and sys.argv[index + 1] == "1"
+    )
+    for index, argument in enumerate(sys.argv)
+)
+matplotlib.use("Agg" if NO_PLOT_REQUESTED else "QtAgg")
 
 # Remove os atalhos padrao do Matplotlib que fecham a janela com q
 matplotlib.rcParams["keymap.quit"] = []
@@ -156,6 +172,22 @@ def format_battery_lifetime(lifetime_h):
     months, days = divmod(remaining_days, days_per_month)
 
     return f"{years}y {months}months {days}d {hours}h {minutes}min"
+
+
+def terminal_stop_requested():
+    if os.name == "nt":
+        while msvcrt.kbhit():
+            if msvcrt.getwch() in ("q", "Q", "\x1b"):
+                return True
+
+        return False
+
+    readable, _, _ = select.select([sys.stdin], [], [], 0)
+
+    if readable:
+        return sys.stdin.readline(1).lower() in ("q", "\x1b")
+
+    return False
 
 # Função para downsample dos dados para plotagem
 def downsample_for_plot(df, downsample_ms):
@@ -361,6 +393,7 @@ def main():
     parser.add_argument("--prefix", required=True)
     parser.add_argument("--voltage", type=float, default=3.3)
     parser.add_argument("--battery-capacity", type=float, default=0.0)
+    parser.add_argument("--no-plot", type=int, choices=[0, 1], default=0)
     parser.add_argument("--refresh-ms", type=int, default=1000)
     parser.add_argument("--downsample-ms", type=float, default=10.0)
     parser.add_argument("--window-s", type=float, default=0.0)
@@ -369,6 +402,7 @@ def main():
     parser.add_argument("--duration-ms", type=float, default=0.0)
 
     args = parser.parse_args()
+    no_plot = args.no_plot == 1
 
     reader = LiveCsvReader(
         folder=args.folder,
@@ -387,22 +421,22 @@ def main():
     last_time_s = None
     last_power_W = None
 
-    # Configura o matplotlib
-    plt.ion()
+    if not no_plot:
+        plt.ion()
 
-    fig, ax_current = plt.subplots(1, 1, figsize=(11, 4))
+        fig, ax_current = plt.subplots(1, 1, figsize=(11, 4))
 
-    line_current, = ax_current.plot([], [])
+        line_current, = ax_current.plot([], [])
 
-    ax_current.set_ylabel("Current (mA)")
-    ax_current.set_xlabel("Time (s)")
-    ax_current.grid(True)
+        ax_current.set_ylabel("Current (mA)")
+        ax_current.set_xlabel("Time (s)")
+        ax_current.grid(True)
 
-    fig.suptitle("EnergyTrace LiveMode")
-    fig.tight_layout(rect=[0, 0, 1, 0.95])
+        fig.suptitle("EnergyTrace LiveMode")
+        fig.tight_layout(rect=[0, 0, 1, 0.95])
 
-    plt.show(block=False)
-    configure_window(fig, width=1200, height=650)
+        plt.show(block=False)
+        configure_window(fig, width=1200, height=650)
 
     stop_file = Path(args.stop_file) if args.stop_file else None
 
@@ -570,8 +604,9 @@ def main():
             )
             state["final_total_printed"] = True
 
-        fig.suptitle(f"EnergyTrace LiveMode - {reason}")
-        fig.canvas.draw_idle()
+        if not no_plot:
+            fig.suptitle(f"EnergyTrace LiveMode - {reason}")
+            fig.canvas.draw_idle()
 
 
     def request_stop():
@@ -661,24 +696,31 @@ def main():
             label="INTERVAL",
         )
 
-    span_selector = SpanSelector(
-        ax_current,
-        on_select_interval,
-        "horizontal",
-        useblit=True,
-        interactive=True,
-        button=1,
-        minspan=MIN_INTERVAL_S
-    )
+    if not no_plot:
+        span_selector = SpanSelector(
+            ax_current,
+            on_select_interval,
+            "horizontal",
+            useblit=True,
+            interactive=True,
+            button=1,
+            minspan=MIN_INTERVAL_S
+        )
 
-    fig.canvas.mpl_connect("key_press_event", on_key_press)
-    fig.canvas.mpl_connect("button_press_event", on_mouse_press)
-    fig.canvas.mpl_connect("button_release_event", on_mouse_release)
+        fig.canvas.mpl_connect("key_press_event", on_key_press)
+        fig.canvas.mpl_connect("button_press_event", on_mouse_press)
+        fig.canvas.mpl_connect("button_release_event", on_mouse_release)
 
     last_status_len = 0
 
     # Loop principal de atualização do gráfico
-    while plt.fignum_exists(fig.number):
+    while (no_plot and state["running"]) or (
+        not no_plot and plt.fignum_exists(fig.number)
+    ):
+        if no_plot and terminal_stop_requested():
+            request_stop()
+            break
+
         if not state["running"]:
             plt.pause(0.2)
             continue
@@ -741,49 +783,50 @@ def main():
             plot_time_src = [time_data[idx] for idx in keep]
             plot_current_src = [current_data[idx] for idx in keep]
 
-        plot_df = pd.DataFrame({
-            "time_s": np.asarray(plot_time_src, dtype=np.float64),
-            "voltage_V": np.ones(len(plot_time_src), dtype=np.float64),
-            "current_A": np.asarray(plot_current_src, dtype=np.float64) / 1000.0,
-        })
+        if not no_plot:
+            plot_df = pd.DataFrame({
+                "time_s": np.asarray(plot_time_src, dtype=np.float64),
+                "voltage_V": np.ones(len(plot_time_src), dtype=np.float64),
+                "current_A": np.asarray(plot_current_src, dtype=np.float64) / 1000.0,
+            })
 
-        plot_df = downsample_for_plot(
-            plot_df,
-            args.downsample_ms
-        )
+            plot_df = downsample_for_plot(
+                plot_df,
+                args.downsample_ms
+            )
 
-        plot_time_src = plot_df["time_s"].to_numpy(dtype=np.float64)
-        plot_current_src = plot_df["current_A"].to_numpy(dtype=np.float64) * 1000.0
+            plot_time_src = plot_df["time_s"].to_numpy(dtype=np.float64)
+            plot_current_src = plot_df["current_A"].to_numpy(dtype=np.float64) * 1000.0
 
-        plot_time, plot_current = limit_plot_points_peak_preserving(
-            plot_time_src,
-            plot_current_src,
-            max_points=args.plot_max_points
-        )
+            plot_time, plot_current = limit_plot_points_peak_preserving(
+                plot_time_src,
+                plot_current_src,
+                max_points=args.plot_max_points
+            )
 
-        line_current.set_data(plot_time, plot_current)
+            line_current.set_data(plot_time, plot_current)
 
-        ax_current.relim()
+            ax_current.relim()
 
-        if args.window_s > 0 and len(time_data) > 1:
-            tmax = time_data[-1]
-            tmin = max(time_data[0], tmax - args.window_s)
+            if args.window_s > 0 and len(time_data) > 1:
+                tmax = time_data[-1]
+                tmin = max(time_data[0], tmax - args.window_s)
 
-            ax_current.set_xlim(tmin, tmax)
-            ax_current.autoscale_view(scalex=False, scaley=True)
+                ax_current.set_xlim(tmin, tmax)
+                ax_current.autoscale_view(scalex=False, scaley=True)
 
-        elif args.duration_ms > 0 and len(time_data) > 1:
-            tmin = 0.0
-            tmax = args.duration_ms / 1000.0
+            elif args.duration_ms > 0 and len(time_data) > 1:
+                tmin = 0.0
+                tmax = args.duration_ms / 1000.0
 
-            ax_current.set_xlim(tmin, tmax)
-            ax_current.autoscale_view(scalex=False, scaley=True)
+                ax_current.set_xlim(tmin, tmax)
+                ax_current.autoscale_view(scalex=False, scaley=True)
 
-        else:
-            ax_current.autoscale_view(scalex=True, scaley=True)
+            else:
+                ax_current.autoscale_view(scalex=True, scaley=True)
 
-        fig.canvas.draw()
-        fig.canvas.flush_events()
+            fig.canvas.draw()
+            fig.canvas.flush_events()
 
         elapsed_s = time_data[-1] - time_data[0] if len(time_data) > 1 else 0.0
 
@@ -823,7 +866,10 @@ def main():
                     create_stop_file=False
                 )
 
-        plt.pause(args.refresh_ms / 1000.0)
+        if no_plot:
+            time.sleep(args.refresh_ms / 1000.0)
+        else:
+            plt.pause(args.refresh_ms / 1000.0)
 
     print("Real time plot finished.")
 

@@ -59,6 +59,7 @@ STUNE_EXE = DEFAULT_STUNE_DIR / STUNE_EXE_NAME
 DEFAULT_DEVICE = "CC1352"
 DEFAULT_VOLTAGE = 3.3
 DEFAULT_BATTERY_CAPACITY_MAH = 0.0
+DEFAULT_NO_PLOT = 0
 
 # Duration in ms. Use 0 for indefinite capture.
 DEFAULT_DURATION_MS = 0.0
@@ -78,6 +79,7 @@ DEFAULT_SETTINGS = {
     "device": DEFAULT_DEVICE,
     "voltage": DEFAULT_VOLTAGE,
     "battery_capacity": DEFAULT_BATTERY_CAPACITY_MAH,
+    "no_plot": DEFAULT_NO_PLOT,
     "duration": DEFAULT_DURATION_MS,
     "downsample": DEFAULT_DOWNSAMPLE_MS,
     "refresh": DEFAULT_REFRESH_MS,
@@ -102,6 +104,7 @@ SETTING_TYPES = {
     "device": str,
     "voltage": float,
     "battery_capacity": float,
+    "no_plot": int,
     "duration": float,
     "downsample": float,
     "refresh": int,
@@ -198,6 +201,7 @@ def build_runtime_settings(args) -> dict:
         "device": args.device,
         "voltage": args.voltage,
         "battery_capacity": args.battery_capacity,
+        "no_plot": args.no_plot,
         "duration": args.duration,
         "downsample": args.downsample,
         "refresh": args.refresh,
@@ -593,6 +597,14 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--no-plot",
+        type=int,
+        choices=[0, 1],
+        default=None,
+        help="Disable the live plot while keeping capture and analysis enabled. Use 1 to disable."
+    )
+
+    parser.add_argument(
         "--duration",
         type=float,
         default=None,
@@ -651,6 +663,7 @@ def main() -> int:
     device = settings["device"]
     voltage = settings["voltage"]
     battery_capacity_mAh = settings["battery_capacity"]
+    no_plot = settings["no_plot"] == 1
     duration_ms = settings["duration"]
     downsample_ms = settings["downsample"]
     refresh_ms = settings["refresh"]
@@ -709,6 +722,8 @@ def main() -> int:
         print(f"Battery (mAh):   {battery_capacity_mAh}")
     else:
         print(f"Battery (mAh):   not set (0)")
+
+    print(f"Plot:            {'disabled' if no_plot else 'enabled'}")
 
     if duration_ms > 0: print(f"Duration (ms):   {duration_ms}")
     else: print(f"Duration (ms):   indefinite (0)")
@@ -835,6 +850,8 @@ def main() -> int:
         str(voltage),
         "--battery-capacity",
         str(battery_capacity_mAh),
+        "--no-plot",
+        str(int(no_plot)),
         "--refresh-ms",
         str(refresh_ms),
         "--downsample-ms",
@@ -855,14 +872,19 @@ def main() -> int:
         env=env,
     )
 
-    print("LivePlot started.")
-    print()
-    print("LivePlot commands:")
-    print("  q or Esc      -> stop capture")
-    print("  t             -> total until current time")
-    print("  left drag     -> interval analysis")
-    print("  right click   -> point analysis")
-    print()
+    if no_plot:
+        print("LivePlot disabled. Capture and analysis are still running.")
+        print("Press q or Esc in this terminal to stop the capture.")
+        print()
+    else:
+        print("LivePlot started.")
+        print()
+        print("LivePlot commands:")
+        print("  q or Esc      -> stop capture")
+        print("  t             -> total until current time")
+        print("  left drag     -> interval analysis")
+        print("  right click   -> point analysis")
+        print()
 
     # -----------------------------------------------------
     # Monitor
@@ -896,9 +918,14 @@ def main() -> int:
             if stune_proc.poll() is not None:
                 print()
                 print("stune process finished.")
+
+                if no_plot and duration_ms > 0 and live_proc.poll() is None:
+                    time.sleep(1)
+                    continue
+
                 break
 
-            if live_proc.poll() is not None:
+            if not no_plot and live_proc.poll() is not None:
                 print()
                 print("LivePlot was closed.")
                 stop_process(stune_proc, "stune")
@@ -920,7 +947,9 @@ def main() -> int:
     # Keep plot open if it is still running
     # -----------------------------------------------------
 
-    if live_proc.poll() is None:
+    if no_plot and live_proc.poll() is None:
+        stop_process(live_proc, "analysis")
+    elif live_proc.poll() is None:
         print()
         print("Capture stopped/finished.")
         print("Close the LivePlot window to finish the runner.")
