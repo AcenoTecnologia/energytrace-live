@@ -283,7 +283,7 @@ py run_energytrace_live.py ^
 
 Will generate:
 
-```bash
+```text
 =========================================================
 EnergyTrace LiveMode Runner
 =========================================================
@@ -323,7 +323,9 @@ py run_energytrace_live.py ^
   --et-mode et
 ```
 
-```bash
+Will generate:
+
+```text
 =========================================================
 EnergyTrace LiveMode Runner
 =========================================================
