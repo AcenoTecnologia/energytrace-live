@@ -392,7 +392,7 @@ def main():
     parser.add_argument("--folder", required=True)
     parser.add_argument("--prefix", required=True)
     parser.add_argument("--voltage", type=float, default=3.3)
-    parser.add_argument("--battery-capacity", type=float, default=0.0)
+    parser.add_argument("--battery-capacity", type=float, default=220.0)
     parser.add_argument("--no-plot", type=int, choices=[0, 1], default=0)
     parser.add_argument("--refresh-ms", type=int, default=1000)
     parser.add_argument("--downsample-ms", type=float, default=10.0)

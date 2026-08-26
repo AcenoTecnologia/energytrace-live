@@ -250,12 +250,14 @@ Make sure `--device` and `--config` refer to the same hardware target.
 | `--max-points` | Maximum number of points displayed in the live plot. |
 | `--et-mode` | EnergyTrace mode passed to `stune`. Usually `et`, the `et++` mode may not work for some devices. |
 
+The default battery capacity is `220 mAh`, a typical nominal capacity for a **CR2032** coin cell. Actual capacity varies with manufacturer, load, temperature, and cutoff voltage.
+
 Typical default values:
 
 ```python
 DEFAULT_DEVICE = "CC1352"
 DEFAULT_VOLTAGE = 3.3
-DEFAULT_BATTERY_CAPACITY_MAH = 0.0
+DEFAULT_BATTERY_CAPACITY_MAH = 220.0
 DEFAULT_NO_PLOT = 0
 DEFAULT_DURATION_MS = 0.0
 DEFAULT_DOWNSAMPLE_MS = 0.01
@@ -298,6 +300,7 @@ Config:          C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang
 Device:          CC1352
 Voltage (V):     3.3
 Battery (mAh):   not set (0)
+Plot:            enabled
 Duration (ms):   indefinite (0)
 Refresh (ms):    10
 Window (s):      full capture (0)
@@ -323,7 +326,8 @@ py run_energytrace_live.py ^
   --downsample 0.01 ^
   --refresh 10 ^
   --max-points 2000 ^
-  --et-mode et
+  --et-mode et ^
+  --no-plot 0
 ```
 
 Will generate:
@@ -340,6 +344,7 @@ Config:          C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang
 Device:          CC1352
 Voltage (V):     3.3
 Battery (mAh):   220.0
+Plot:            enabled
 Duration (ms):   10000.0
 Refresh (ms):    10
 Window (s):      5.0
