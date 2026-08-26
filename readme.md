@@ -21,6 +21,7 @@ The project is designed to work on **Windows** and **native Linux** when a valid
   - [CCS Path](#ccs-path)
   - [Target Configuration](#target-configuration)
   - [Device Name](#device-name)
+  - [Local Defaults](#local-defaults)
 - [Command-Line Parameters](#command-line-parameters)
 - [Command-Line Usage](#command-line-usage)
   - [Windows](#windows)
