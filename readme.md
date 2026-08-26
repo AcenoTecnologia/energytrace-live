@@ -231,6 +231,24 @@ CC1352
 
 Make sure `--device` and `--config` refer to the same hardware target.
 
+### Local Defaults
+
+To avoid repeating machine-specific options, copy `config.example.json` to `config.local.json` and edit the local file with your CCS and target configuration paths:
+
+```bat
+copy config.example.json config.local.json
+```
+
+The runner automatically loads `config.local.json` when it exists. This file is ignored by Git, so each user can keep different local paths without changing the repository. Command-line arguments override the local file, and an explicit `--settings` file overrides the local file as well.
+
+For example, after creating `config.local.json`, run:
+
+```bat
+py run_energytrace_live.py
+```
+
+The settings priority is: built-in defaults, `config.local.json`, explicit `--settings` file, and command-line arguments.
+
 ---
 
 ## Command-Line Parameters

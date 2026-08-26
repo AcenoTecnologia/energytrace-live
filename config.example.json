@@ -1,14 +1,14 @@
 {
-  "ccs": "C:/ti/ccs2051",
-  "target_config": "C:/ti/workspace_ccstheia/zed_sw_CC1352P_2_LAUNCHXL_tirtos7_ticlang/targetConfigs/CC1352P1F3.ccxml",
+  "ccs": "C:/ti/ccs2100",
+  "target_config": "C:/path/to/your/project/targetConfigs/YourBoard.ccxml",
   "device": "CC1352",
   "voltage": 3.3,
-  "battery_capacity": 2000,
+  "battery_capacity": 220,
   "no_plot": 0,
-  "duration": 2000,
-  "downsample": 1,
-  "refresh": 1000,
-  "window": 1,
-  "max_points": 100,
+  "duration": 0,
+  "downsample": 0.01,
+  "refresh": 10,
+  "window": 0,
+  "max_points": 2000,
   "et_mode": "et"
 }

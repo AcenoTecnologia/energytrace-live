@@ -26,6 +26,9 @@ BASE_DIR = SCRIPT_DIR
 # Live plot script located in the same folder as this runner
 PLOT_SCRIPT = SCRIPT_DIR / "plot_energytrace_live.py"
 
+# Optional machine-specific settings file. This file is ignored by Git.
+LOCAL_SETTINGS_FILE = SCRIPT_DIR / "config.local.json"
+
 # ---------------------------------------------------------
 # CCS / STUNE paths
 # ---------------------------------------------------------
@@ -191,6 +194,9 @@ def load_settings_file(settings_file: str) -> dict:
 
 def build_runtime_settings(args) -> dict:
     settings = DEFAULT_SETTINGS.copy()
+
+    if LOCAL_SETTINGS_FILE.exists():
+        settings.update(load_json_settings(LOCAL_SETTINGS_FILE))
 
     file_settings = load_settings_file(args.settings_file)
     settings.update(file_settings)
