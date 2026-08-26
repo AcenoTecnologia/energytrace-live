@@ -1,6 +1,6 @@
 # EnergyTrace Live
 
-A Python-based tool to automate **Texas Instruments EnergyTrace** measurements using TI `stune`, capture current consumption from a TI LaunchPad/XDS110, and display the data in real time.
+A Python-based tool to automate **Texas Instruments EnergyTrace** measurements using TI `stune`, capture current consumption and display the data in real time.
 
 The project is designed to work on **Windows** and **native Linux** when a valid Code Composer Studio installation and XDS110 debug probe are available.
 
@@ -299,7 +299,7 @@ Config:          C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang
 
 Device:          CC1352
 Voltage (V):     3.3
-Battery (mAh):   not set (0)
+Battery (mAh):   220.0
 Plot:            enabled
 Duration (ms):   indefinite (0)
 Refresh (ms):    10
@@ -320,7 +320,7 @@ py run_energytrace_live.py ^
   --ccs "C:\ti\ccs2051" ^
   --config "C:\ti\workspace_ccstheia\zed_sw_CC1352P_2_LAUNCHXL_tirtos7_ticlang\targetConfigs\CC1352P1F3.ccxml" ^
   --device CC1352 ^
-  --battery-capacity 220
+  --battery-capacity 2000 ^
   --duration 10000 ^
   --window 5 ^
   --downsample 0.01 ^
@@ -343,7 +343,7 @@ Config:          C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang
 
 Device:          CC1352
 Voltage (V):     3.3
-Battery (mAh):   220.0
+Battery (mAh):   2000.0
 Plot:            enabled
 Duration (ms):   10000.0
 Refresh (ms):    10
