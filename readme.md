@@ -280,6 +280,31 @@ py run_energytrace_live.py ^
   --device CC1352
 ```
 
+Will generate:
+
+```bat
+=========================================================
+EnergyTrace LiveMode Runner
+=========================================================
+OS:              Windows
+
+CCS:             C:\ti\ccs2051\ccs
+Config:          C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang\targetConfigs\CC1352P7.ccxml
+
+Device:          CC1352
+Voltage (V):     3.3
+Duration (ms):   indefinite (0)
+Refresh (ms):    10
+Window (s):      full capture (0)
+ET mode:         et
+
+CSV:             C:\ti\energytrace-live\out\20260826_132420\csv\energytrace_20260826_132420.csv
+Log:             C:\ti\energytrace-live\out\20260826_132420\log\stune_log_20260826_132420.txt
+=========================================================
+```
+
+![Basic example plot](\energytrace-live\Figs\basic_example.png)
+
 With capture options:
 
 ```bat
