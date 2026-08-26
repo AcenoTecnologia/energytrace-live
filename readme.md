@@ -303,7 +303,7 @@ Log:             C:\ti\energytrace-live\out\20260826_132420\log\stune_log_202608
 =========================================================
 ```
 
-![Basic example plot](\energytrace-live\Figs\basic_example.png)
+![Basic example plot](Figs/basic_example.png)
 
 With capture options:
 
