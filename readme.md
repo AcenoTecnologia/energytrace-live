@@ -294,6 +294,7 @@ Config:          C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang
 
 Device:          CC1352
 Voltage (V):     3.3
+Battery (mAh):   not set (0)
 Duration (ms):   indefinite (0)
 Refresh (ms):    10
 Window (s):      full capture (0)
@@ -313,14 +314,38 @@ py run_energytrace_live.py ^
   --ccs "C:\ti\ccs2051" ^
   --config "C:\ti\workspace_ccstheia\zed_sw_CC1352P_2_LAUNCHXL_tirtos7_ticlang\targetConfigs\CC1352P1F3.ccxml" ^
   --device CC1352 ^
+  --battery-capacity 220
   --duration 10000 ^
   --window 5 ^
   --downsample 0.01 ^
   --refresh 10 ^
   --max-points 2000 ^
   --et-mode et
-  --battery-capacity 2000
 ```
+
+```bash
+=========================================================
+EnergyTrace LiveMode Runner
+=========================================================
+OS:              Windows
+
+CCS:             C:\ti\ccs2051\ccs
+Config:          C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang\targetConfigs\CC1352P7.ccxml
+
+Device:          CC1352
+Voltage (V):     3.3
+Battery (mAh):   220.0
+Duration (ms):   10000.0
+Refresh (ms):    10
+Window (s):      5.0
+ET mode:         et
+
+CSV:             C:\ti\energytrace-live\out\20260826_141259\csv\energytrace_20260826_141259.csv
+Log:             C:\ti\energytrace-live\out\20260826_141259\log\stune_log_20260826_141259.txt
+=========================================================
+```
+
+![Capture options example plot](Figs/capture_options_example.png)
 
 ### Linux
 
@@ -435,6 +460,9 @@ Energy
   Energy in Interval:       104.977774 mJ
   Energy Start:             0.000000 mJ
   Energy End:               104.977774 mJ
+
+Battery Lifetime
+  Estimate:                 not calculated
 =========================================================
 ```
 

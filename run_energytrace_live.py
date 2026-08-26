@@ -704,7 +704,11 @@ def main() -> int:
     print()
     print(f"Device:          {device}")
     print(f"Voltage (V):     {voltage}")
-    print(f"Battery (mAh):   {battery_capacity_mAh}")
+
+    if battery_capacity_mAh > 0:
+        print(f"Battery (mAh):   {battery_capacity_mAh}")
+    else:
+        print(f"Battery (mAh):   not set (0)")
 
     if duration_ms > 0: print(f"Duration (ms):   {duration_ms}")
     else: print(f"Duration (ms):   indefinite (0)")

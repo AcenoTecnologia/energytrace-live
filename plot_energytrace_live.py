@@ -126,6 +126,37 @@ def find_column(columns, required_words):
 
     return None
 
+
+def format_battery_lifetime(lifetime_h):
+    total_minutes = max(0, int(lifetime_h * 60))
+    minutes_per_hour = 60
+    hours_per_day = 24
+    days_per_month = 30
+    days_per_year = 365
+
+    if total_minutes < minutes_per_hour:
+        return f"{total_minutes}min"
+
+    total_hours, minutes = divmod(total_minutes, minutes_per_hour)
+
+    if total_hours < hours_per_day:
+        return f"{total_hours}h {minutes}min"
+
+    total_days, hours = divmod(total_hours, hours_per_day)
+
+    if total_days < days_per_month:
+        return f"{total_days}d {hours}h {minutes}min"
+
+    if total_days < days_per_year:
+        total_months, days = divmod(total_days, days_per_month)
+
+        return f"{total_months}months {days}d {hours}h {minutes}min"
+
+    years, remaining_days = divmod(total_days, days_per_year)
+    months, days = divmod(remaining_days, days_per_month)
+
+    return f"{years}y {months}months {days}d {hours}h {minutes}min"
+
 # Função para downsample dos dados para plotagem
 def downsample_for_plot(df, downsample_ms):
     if df.empty:
@@ -478,7 +509,8 @@ def main():
             print("  Estimate:                 unavailable (average current must be positive)")
         else:
             lifetime_h = args.battery_capacity / avg_current_mA
-            print(f"  Estimate:                 {lifetime_h:.6f} h")
+            lifetime_text = format_battery_lifetime(lifetime_h)
+            print(f"  Estimate:                 {lifetime_text}")
 
         print("=========================================================")
 
