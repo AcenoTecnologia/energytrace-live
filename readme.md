@@ -294,7 +294,7 @@ Config:          C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang
 
 Device:          CC1352
 Voltage (V):     3.3
-Battery (mAh):   not set (0)
+Battery (mAh):    (0)
 Duration (ms):   indefinite (0)
 Refresh (ms):    10
 Window (s):      full capture (0)
