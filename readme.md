@@ -542,6 +542,12 @@ Energy is calculated by numerical integration of power over time.
 
 Downsampling is used only for plotting performance. Raw data should be used for energy, average, min, max, and interval calculations.
 
+The estimated battery lifetime is calculated by:
+
+```python
+lifetime_h = battery_capacity_mAh / avg_current_mA
+```
+
 ---
 
 ## Notes About CCS 20 and CCS 12
