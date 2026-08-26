@@ -279,7 +279,8 @@ Basic example:
 py run_energytrace_live.py ^
   --ccs "C:\ti\ccs2051" ^
   --config "C:\ti\workspace_ccstheia\zed_sw_CC1352P_2_LAUNCHXL_tirtos7_ticlang\targetConfigs\CC1352P1F3.ccxml" ^
-  --device CC1352```
+  --device CC1352
+```
 
 Will generate:
 
@@ -294,7 +295,7 @@ Config:          C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang
 
 Device:          CC1352
 Voltage (V):     3.3
-Battery (mAh):    (0)
+Battery (mAh):   not set (0)
 Duration (ms):   indefinite (0)
 Refresh (ms):    10
 Window (s):      full capture (0)
