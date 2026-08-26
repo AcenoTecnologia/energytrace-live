@@ -250,8 +250,6 @@ Make sure `--device` and `--config` refer to the same hardware target.
 | `--max-points` | Maximum number of points displayed in the live plot. |
 | `--et-mode` | EnergyTrace mode passed to `stune`. Usually `et`, the `et++` mode may not work for some devices. |
 
-The default battery capacity is `220 mAh`, a typical nominal capacity for a **CR2032** coin cell. Actual capacity varies with manufacturer, load, temperature, and cutoff voltage.
-
 Typical default values:
 
 ```python
@@ -266,6 +264,8 @@ DEFAULT_WINDOW_S = 0.0
 DEFAULT_MAX_POINTS = 2000
 DEFAULT_ET_MODE = "et"
 ```
+
+The default battery capacity is `220 mAh`, a typical nominal capacity for a **CR2032** coin cell. Actual capacity varies with manufacturer, load, temperature, and cutoff voltage.
 
 The voltage value passed through `--voltage` is only used as a fallback. If the EnergyTrace CSV contains a voltage column, the voltage from the CSV is used instead.
 
