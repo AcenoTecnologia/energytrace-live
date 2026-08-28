@@ -18,6 +18,9 @@ Older CCS versions (e.g., CCS v12.x) provide an EnergyTrace implementation that 
   - [Software](#software)
   - [Python Packages](#python-packages)
 - [Quick Start](#quick-start)
+- [Usage Examples](#usage-examples)
+  - [Windows](#windows)
+  - [Linux](#linux)
 - [Local Defaults](#local-defaults)
 - [Command-Line Parameters](#command-line-parameters)
 - [Live Plot](#live-plot)
@@ -26,9 +29,6 @@ Older CCS versions (e.g., CCS v12.x) provide an EnergyTrace implementation that 
   - [Interval Analysis](#interval-analysis)
   - [Point Analysis](#point-analysis)
 - [No-Plot](#no-plot)
-- [Usage Examples](#usage-examples)
-  - [Windows](#windows)
-  - [Linux](#linux)
 - [Output Files](#output-files)
 - [Warm-up Routine](#warm-up-routine)
 - [Notes About Sampling and Calculations](#notes-about-sampling-and-calculations)
@@ -104,6 +104,127 @@ To run the tool:
 
 ```bash
 python run_energytrace_live.py
+```
+
+---
+
+## Usage Examples
+
+To run the script, you must open the terminal in the directory where you cloned the repository and the `.py` files are located.
+
+### Windows
+
+Basic example:
+
+```bat
+py run_energytrace_live.py ^
+  --ccs "C:\ti\ccs2051" ^
+  --config "C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang\targetConfigs\CC1352P7.ccxml"
+```
+
+Will generate:
+
+```text
+=========================================================
+EnergyTrace LiveMode Runner
+=========================================================
+OS:              Windows
+
+CCS:             C:\ti\ccs2051\ccs
+Config:          C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang\targetConfigs\CC1352P7.ccxml
+
+Device:          CC1352
+Voltage (V):     3.3
+Battery (mAh):   220.0
+Plot:            enabled
+Duration (ms):   indefinite (0)
+Refresh (ms):    10
+Window (s):      full capture (0)
+ET mode:         et
+
+CSV:             C:\ti\energytrace-live\out\20260826_132420\csv\energytrace_20260826_132420.csv
+Log:             C:\ti\energytrace-live\out\20260826_132420\log\stune_log_20260826_132420.txt
+=========================================================
+```
+
+![Basic example plot](Figs/basic_example.png)
+
+With capture options:
+
+```bat
+py run_energytrace_live.py ^
+  --ccs "C:\ti\ccs2051" ^
+  --config "C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang\targetConfigs\CC1352P7.ccxml" ^
+  --device CC1352 ^
+  --battery-capacity 2000 ^
+  --duration 10000 ^
+  --window 5 ^
+  --downsample 0.01 ^
+  --refresh 10 ^
+  --max-points 2000 ^
+  --et-mode et ^
+  --no-plot 0
+```
+
+Will generate:
+
+```text
+=========================================================
+EnergyTrace LiveMode Runner
+=========================================================
+OS:              Windows
+
+CCS:             C:\ti\ccs2051\ccs
+Config:          C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang\targetConfigs\CC1352P7.ccxml
+
+Device:          CC1352
+Voltage (V):     3.3
+Battery (mAh):   2000.0
+Plot:            enabled
+Duration (ms):   10000.0
+Refresh (ms):    10
+Window (s):      5.0
+ET mode:         et
+
+CSV:             C:\ti\energytrace-live\out\20260826_141259\csv\energytrace_20260826_141259.csv
+Log:             C:\ti\energytrace-live\out\20260826_141259\log\stune_log_20260826_141259.txt
+=========================================================
+```
+
+![Capture options example plot](Figs/capture_options_example.png)
+
+### Linux
+
+Activate the virtual environment first:
+
+```bash
+cd ~/energytrace-live
+source .venv/bin/activate
+```
+
+Basic example:
+
+```bash
+python run_energytrace_live.py \
+  --ccs "$HOME/ti/ccs2051" \
+  --config "$HOME/ti/CC1352P1F3.ccxml"
+```
+
+With capture options:
+
+```bash
+python run_energytrace_live.py \
+  --ccs "$HOME/ti/ccs2051" \
+  --config "$HOME/ti/CC1352P1F3.ccxml" \
+  --battery-capacity 2000 \
+  --device CC1352 \
+  --duration 10000 \
+  --window 5 \
+  --downsample 0.01 \
+  --refresh 10 \
+  --max-points 2000 \
+  --et-mode et \
+  --no-plot 0
 ```
 
 ---
@@ -265,127 +386,6 @@ Example:
 
 ```bat
 py run_energytrace_live.py --no-plot 1
-```
-
----
-
-## Usage Examples
-
-To run the script, you must open the terminal in the directory where you cloned the repository and the `.py` files are located.
-
-### Windows
-
-Basic example:
-
-```bat
-py run_energytrace_live.py ^
-  --ccs "C:\ti\ccs2051" ^
-  --config "C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang\targetConfigs\CC1352P7.ccxml"
-```
-
-Will generate:
-
-```text
-=========================================================
-EnergyTrace LiveMode Runner
-=========================================================
-OS:              Windows
-
-CCS:             C:\ti\ccs2051\ccs
-Config:          C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang\targetConfigs\CC1352P7.ccxml
-
-Device:          CC1352
-Voltage (V):     3.3
-Battery (mAh):   220.0
-Plot:            enabled
-Duration (ms):   indefinite (0)
-Refresh (ms):    10
-Window (s):      full capture (0)
-ET mode:         et
-
-CSV:             C:\ti\energytrace-live\out\20260826_132420\csv\energytrace_20260826_132420.csv
-Log:             C:\ti\energytrace-live\out\20260826_132420\log\stune_log_20260826_132420.txt
-=========================================================
-```
-
-![Basic example plot](Figs/basic_example.png)
-
-With capture options:
-
-```bat
-py run_energytrace_live.py ^
-  --ccs "C:\ti\ccs2051" ^
-  --config "C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang\targetConfigs\CC1352P7.ccxml" ^
-  --device CC1352 ^
-  --battery-capacity 2000 ^
-  --duration 10000 ^
-  --window 5 ^
-  --downsample 0.01 ^
-  --refresh 10 ^
-  --max-points 2000 ^
-  --et-mode et ^
-  --no-plot 0
-```
-
-Will generate:
-
-```text
-=========================================================
-EnergyTrace LiveMode Runner
-=========================================================
-OS:              Windows
-
-CCS:             C:\ti\ccs2051\ccs
-Config:          C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang\targetConfigs\CC1352P7.ccxml
-
-Device:          CC1352
-Voltage (V):     3.3
-Battery (mAh):   2000.0
-Plot:            enabled
-Duration (ms):   10000.0
-Refresh (ms):    10
-Window (s):      5.0
-ET mode:         et
-
-CSV:             C:\ti\energytrace-live\out\20260826_141259\csv\energytrace_20260826_141259.csv
-Log:             C:\ti\energytrace-live\out\20260826_141259\log\stune_log_20260826_141259.txt
-=========================================================
-```
-
-![Capture options example plot](Figs/capture_options_example.png)
-
-### Linux
-
-Activate the virtual environment first:
-
-```bash
-cd ~/energytrace-live
-source .venv/bin/activate
-```
-
-Basic example:
-
-```bash
-python run_energytrace_live.py \
-  --ccs "$HOME/ti/ccs2051" \
-  --config "$HOME/ti/CC1352P1F3.ccxml"
-```
-
-With capture options:
-
-```bash
-python run_energytrace_live.py \
-  --ccs "$HOME/ti/ccs2051" \
-  --config "$HOME/ti/CC1352P1F3.ccxml" \
-  --battery-capacity 2000 \
-  --device CC1352 \
-  --duration 10000 \
-  --window 5 \
-  --downsample 0.01 \
-  --refresh 10 \
-  --max-points 2000 \
-  --et-mode et \
-  --no-plot 0
 ```
 
 ---
