@@ -8,20 +8,14 @@ The project is designed to work on **Windows** and **native Linux** when a valid
 
 ## Table of Contents
 
+- [Motivation](#motivation)
 - [Overview](#overview)
 - [Features](#features)
-- [Project Structure](#project-structure)
 - [Requirements](#requirements)
   - [Software](#software)
   - [Python Packages](#python-packages)
 - [Installation](#installation)
-  - [Windows](#windows-installation)
-  - [Linux](#linux-installation)
-- [Configuration](#configuration)
-  - [CCS Path](#ccs-path)
-  - [Target Configuration](#target-configuration)
-  - [Device Name](#device-name)
-  - [Local Defaults](#local-defaults)
+- [Local Defaults](#local-defaults)
 - [Command-Line Parameters](#command-line-parameters)
 - [Command-Line Usage](#command-line-usage)
   - [Windows](#windows)
@@ -50,6 +44,14 @@ The project is designed to work on **Windows** and **native Linux** when a valid
 - [Limitations](#limitations)
 - [Version Notes](#version-notes)
 - [License](#license)
+
+--- 
+
+# Motivation
+
+The EnergyTrace feature in CCS 20 requires an active debug connection to the target device. Therefore, the measured current and power may be higher than those obtained with EnergyTrace Live, since the debug interface and related circuitry can contribute to the overall power consumption. Besides that, you can't run it in real time and the total time it runs is really limited.
+
+Older CCS versions (e.g., CCS v12.x) provide an EnergyTrace implementation that can operate without an active debug session, resulting in measurements that are expected to be closer to those obtained with EnergyTrace Live, but it's a legacy version.
 
 ---
 
@@ -110,6 +112,7 @@ pip install numpy pandas matplotlib PyQt6
 
 `PyQt6` is required because the live plot uses the Matplotlib `QtAgg` backend.
 
+---
 
 ## Installation
 
@@ -149,7 +152,7 @@ The settings priority is: built-in defaults, `config.local.json`, explicit `--se
 | `--config`, `--target-config` | Path to the `.ccxml` target configuration file (mandatory). | None |
 | `--device` | Device name passed to `stune`, for example `CC1352`, but it will prioritize the device in the `.ccxml` file, so it's recomended to both be the same. | CC1352 |
 | `--voltage` | Fallback voltage used only if the EnergyTrace CSV does not contain voltage data. | 3.3 |
-| `--battery-capacity` | Battery capacity in mAh used to estimate battery lifetime from the measured average current. | 220.0 |
+| `--battery-capacity` | Battery capacity in mAh used to estimate battery lifetime from the measured average current. | 220.0 (CR2032)|
 | `--no-plot` | Set to `1` to disable the live plot while keeping capture and analysis enabled. | 0 |
 | `--duration` | Capture duration in milliseconds. Use `0` for indefinite capture. | 0 |
 | `--downsample` | Downsample window in milliseconds used only for plotting. | 0.01 |
@@ -157,8 +160,6 @@ The settings priority is: built-in defaults, `config.local.json`, explicit `--se
 | `--window` | Visible plot window in seconds. Use `0` to show the full capture. | 0 |
 | `--max-points` | Maximum number of points displayed in the live plot. | 2000 |
 | `--et-mode` | EnergyTrace mode passed to `stune`. Usually `et`, the `et++` mode may not work for some devices. | et |
-
-The default battery capacity is `220 mAh`, a typical nominal capacity for a **CR2032** coin cell. Actual capacity varies with manufacturer, load, temperature, and cutoff voltage.
 
 The sample frequency parameter is not used by this program because some devices use a fixed EnergyTrace sampling rate.
 
@@ -392,6 +393,15 @@ Energy:                     46.917300 mJ
 
 ## Output Files
 
+The `out/` folder is created automatically when the tool runs:
+
+```text
+out/YYYYMMDD_HHMMSS/
+├── csv/
+├── log/
+└── cmd/
+```
+
 The raw EnergyTrace CSV is saved in:
 
 ```text
@@ -415,8 +425,6 @@ Generated `stune` command files are saved in:
 ```text
 out/YYYYMMDD_HHMMSS/cmd/
 ```
-
-The live plot does not generate processed CSV files by default. It displays the real-time graph and prints calculated results in the terminal.
 
 ---
 
@@ -445,14 +453,6 @@ The estimated battery lifetime is calculated by:
 ```python
 lifetime_h = battery_capacity_mAh / avg_current_mA
 ```
-
----
-
-## Notes About CCS 20 and CCS 12
-
-The EnergyTrace feature in CCS 20 requires an active debug connection to the target device. Therefore, the measured current and power may be higher than those obtained with EnergyTrace Live, since the debug interface and related circuitry can contribute to the overall power consumption.
-
-Older CCS versions (e.g., CCS v12.x) provide an EnergyTrace implementation that can operate without an active debug session, resulting in measurements that are expected to be closer to those obtained with EnergyTrace Live.
 
 ---
 
@@ -495,9 +495,9 @@ This may happen when the XDS110/EnergyTrace session is left in a bad state after
 
 Try:
 
+- disconnecting and reconnecting the LaunchPad;
 - closing CCS debug sessions;
 - closing UniFlash, SmartRF Studio, Packet Sniffer, serial monitors, and old `stune` processes;
-- disconnecting and reconnecting the LaunchPad;
 - using a finite capture duration before trying indefinite capture again.
 
 ### `Failed to open debug probe handle`
@@ -530,89 +530,6 @@ Try:
 - running the CCS Linux driver script;
 - updating or recovering XDS110 firmware with TI `xdsdfu` on Windows if needed;
 - using native Windows or native Linux instead of WSL.
-
-### Live Plot Opens but No Data Appears
-
-Possible causes:
-
-- `stune` did not generate a CSV;
-- the wrong CSV folder or prefix was used;
-- the `stune` log contains an error;
-- the XDS110 is being used by another program;
-- the path contains spaces and the current `stune` command handling does not support that path correctly;
-- the live plot opened before the first CSV data was written.
-
-Check the main capture log:
-
-```text
-out/YYYYMMDD_HHMMSS/log/stune_log_YYYYMMDD_HHMMSS.txt
-```
-
-### Qt Window Does Not Open on Linux
-
-The live plot uses:
-
-```python
-matplotlib.use("QtAgg")
-```
-
-Install Qt dependencies:
-
-```bash
-pip install PyQt6
-```
-
-On Ubuntu, these system packages may also help:
-
-```bash
-sudo apt install -y \
-  libxcb-cursor0 \
-  libxkbcommon-x11-0 \
-  libxcb-xinerama0 \
-  libgl1 \
-  libegl1 \
-  libdbus-1-3
-```
-
-Test Qt directly:
-
-```bash
-python -c "from PyQt6.QtWidgets import QApplication, QLabel; app=QApplication([]); w=QLabel('Qt OK'); w.show(); app.exec()"
-```
-
----
-
-## Limitations
-
-- The project depends on TI `stune`.
-- EnergyTrace++ mode may not work depending on the device and target configuration.
-- The sample frequency parameter is not used because some devices use a fixed EnergyTrace sampling rate.
-- WSL support is experimental and may fail even when the XDS110 appears in `lsusb`.
-- XDS110 firmware compatibility is controlled by the TI XDS software stack included with the selected CCS version.
-- If a CCS/stune version requires an XDS110 firmware update, that update must succeed outside the Python tool.
-- The live plot requires a graphical environment and the Qt backend.
-
----
-
-## Version Notes
-
-### V1
-
-- Windows `.bat` runner.
-- Live plot in Python.
-- Manual CCS/stune environment setup through batch commands.
-
-### V2
-
-- Python-based runner.
-- No fixed project directory required.
-- `run_energytrace_live.py` and `plot_energytrace_live.py` only need to stay in the same folder.
-- Supports Windows and native Linux paths.
-- Accepts CCS path, target configuration, device, duration, plot window, downsample, refresh, maximum plot points, and EnergyTrace mode from the command line.
-- Uses timestamped output folders.
-- Keeps warm-up routine to reduce `BAD DATA DETECTED`.
-- Calculates current, power, energy, interval statistics, and current-band analysis.
-- Uses raw data for calculations and downsampled data only for plotting.
 
 ---
 
