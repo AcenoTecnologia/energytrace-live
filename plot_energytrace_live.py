@@ -8,6 +8,8 @@ import time
 from pathlib import Path
 
 import matplotlib
+from matplotlib.backend_bases import MouseButton
+from typing import Any
 
 if os.name == "nt":
     import msvcrt
@@ -34,10 +36,13 @@ import pandas as pd
 
 from matplotlib.widgets import SpanSelector
 
-try:
-    np_trapezoid = np.trapezoid
-except AttributeError:
-    np_trapezoid = np.trapz
+def np_trapezoid(y, x=None, dx=1.0, axis=-1):
+    trapezoid = getattr(np, "trapezoid", None)
+
+    if trapezoid is not None:
+        return trapezoid(y, x=x, dx=dx, axis=axis)
+
+    return np.trapz(y, x=x, dx=dx, axis=axis)
 
 # =========================================================
 # FUNÇÕES AUXILIARES
@@ -46,7 +51,7 @@ except AttributeError:
 # Configura a janela do matplotlib para ficar centralizada na tela e com tamanho definido
 def configure_window(fig, width=1200, height=650):
     try:
-        manager = plt.get_current_fig_manager()
+        manager: Any = plt.get_current_fig_manager()
         window = manager.window
 
         screen = window.screen().availableGeometry()
@@ -79,7 +84,6 @@ def limit_plot_points_peak_preserving(x, current, max_points=10000):
     current_arr = np.asarray(current)
 
     # Cada bloco guarda até 2 pontos: mínimo e máximo da corrente.
-    # Por isso usamos max_points // 2 blocos.
     n_bins = max_points // 2
 
     indices = np.arange(n)
@@ -433,7 +437,7 @@ def main():
         ax_current.grid(True)
 
         fig.suptitle("EnergyTrace LiveMode")
-        fig.tight_layout(rect=[0, 0, 1, 0.95])
+        fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.95))
 
         plt.show(block=False)
         configure_window(fig, width=1200, height=650)
@@ -703,7 +707,7 @@ def main():
             "horizontal",
             useblit=True,
             interactive=True,
-            button=1,
+            button=MouseButton.LEFT,
             minspan=MIN_INTERVAL_S
         )
 
@@ -713,9 +717,11 @@ def main():
 
     last_status_len = 0
 
+    fig_num = plt.get_fignums()[0]
+
     # Loop principal de atualização do gráfico
     while (no_plot and state["running"]) or (
-        not no_plot and plt.fignum_exists(fig.number)
+        not no_plot and plt.fignum_exists(fig_num)
     ):
         if no_plot and terminal_stop_requested():
             request_stop()
