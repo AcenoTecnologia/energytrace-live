@@ -2,11 +2,11 @@
 
 A Python-based tool to automate **Texas Instruments EnergyTrace** measurements using TI `stune`, capture current consumption and display the data in real time.
 
-The EnergyTrace feature in CCS 21.00 has a poor interface, in which you can't export the generated CSV. The tool also requires an active debug connection to the target device, which really limits the use of the tool for real applications, since it's not practical to be debugging all the time when you want to simply acquire information about the energy used in your application. Besides that, the active debug connection can increase the device's measured current. With EnergyTrace Live, you can plot without an active debug session, using just the probe and the required power connections.
+The EnergyTrace feature in CCS 21.00 has a poor interface and you can't export the generated CSV. The tool also requires an active debug connection to the target device, which really limits the use of the tool for real applications, since it's not practical to be debugging all the time when you want to simply acquire information about the energy used in your application. Besides that, the active debug connection can increase the device's measured current. With EnergyTrace Live, you can plot without an active debug session, using just the probe and the required power connections and get the data you want easily.
 
 In addition, CCS does not provide the same live plotting and interactive interval or point analysis workflow, and its capture duration is limited to approximately 230 seconds, while EnergyTrace Live supports indefinite captures and can also analyze points or intervals.
 
-Older CCS versions (e.g., CCS v12.81) provide an EnergyTrace implementation that can operate without an active debug session, but it also has a poor interface, with bad data processing and limited time analysis.
+Older CCS versions (e.g., CCS v12.81) provide an EnergyTrace implementation that can operate without an active debug session, but it also had a poor interface, with bad data processing and limited time analysis.
 
 The project is designed to work on **Windows** and **native Linux** when a valid Code Composer Studio installation and XDS110 debug probe are available.
 
