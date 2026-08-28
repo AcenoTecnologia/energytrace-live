@@ -89,28 +89,16 @@ The scripts can be placed in any directory, as long as both files are kept toget
 
 ---
 
-## Project Structure
-
-The `out/` folder is created automatically when the tool runs:
-
-```text
-out/YYYYMMDD_HHMMSS/
-├── csv/
-├── log/
-└── cmd/
-```
-
----
-
 ## Requirements
 
 ### Software
 
 - Python 3.8 or newer.
-- Texas Instruments Code Composer Studio (it was tested with CCS 12.81, 20.51 and 21.00).
+- Texas Instruments Code Composer Studio (it was tested with 20.51 and 21.00).
 - TI `stune`, installed with CCS.
 - TI LaunchPad/XDS110 with EnergyTrace support.
 - A valid `.ccxml` target configuration file.
+- Proper USB drivers to the utilized probe.
 
 ### Python Packages
 
@@ -125,114 +113,15 @@ pip install numpy pandas matplotlib PyQt6
 
 ## Installation
 
-### Windows
-
-Install Code Composer Studio normally.
-
-Then install the Python dependencies:
-
-```bat
-py -m pip install numpy pandas matplotlib PyQt6
-```
-
-Recommended default CCS location:
-
-```text
-C:\ti\ccs2051
-```
-
-The runner accepts either:
-
-```text
-C:\ti\ccs2051
-C:\ti\ccs2051\ccs
-```
-
-### Linux
-
-Install CCS for Linux.
-
-Recommended installation location:
-
-```text
-/home/<user>/ti/ccs2051
-```
-
-Install Python dependencies using a virtual environment:
+To install the tool, you can just clone the repository to the location you want to use it, keep in mind the out file will be in the same directory as the .py files.
 
 ```bash
-cd ~/energytrace-live
-
-python3 -m venv .venv
-source .venv/bin/activate
-
-pip install numpy pandas matplotlib PyQt6
+git clone https://github.com/AcenoTecnologia/energytrace-live.git
 ```
-
-Install the Linux USB dependency:
-
-```bash
-sudo apt update
-sudo apt install libusb-0.1-4
-```
-
-Run the CCS driver script:
-
-```bash
-sudo "$HOME/ti/ccs2051/ccs/install_scripts/install_drivers.sh"
-```
-
-Reconnect the LaunchPad after installing the drivers.
 
 ---
 
-## Configuration
-
-### CCS Path
-
-The `--ccs` argument points to the CCS installation.
-
-On Windows, both formats are accepted:
-
-```text
-C:\ti\ccs2051
-C:\ti\ccs2051\ccs
-```
-
-On Linux, both formats are accepted:
-
-```text
-~/ti/ccs2051
-~/ti/ccs2051/ccs
-```
-
-The runner resolves the internal `ccs_base` folder automatically.
-
-### Target Configuration
-
-The `--config` or `--target-config` argument points to the `.ccxml` target configuration file.
-
-Example:
-
-```text
-CC1352P1F3.ccxml
-```
-
-The actual target is mainly defined by the `.ccxml` file. Changing only `--device` may not be enough to change the real target used by EnergyTrace.
-
-### Device Name
-
-The `--device` argument is passed to `stune`.
-
-For CC1352 LaunchPad measurements, the typical value is:
-
-```text
-CC1352
-```
-
-Make sure `--device` and `--config` refer to the same hardware target.
-
-### Local Defaults
+## Local Defaults
 
 To avoid repeating machine-specific options, copy `config.example.json` to `config.local.json` and edit the local file with your CCS and target configuration paths:
 
@@ -248,45 +137,28 @@ For example, after creating `config.local.json`, run:
 py run_energytrace_live.py
 ```
 
-The settings priority is: built-in defaults, `config.local.json`, explicit `--settings` file, and command-line arguments.
+The settings priority is: built-in defaults, `config.local.json`, explicit `--settings` file, and command-line arguments. The target configuration has no built-in default, so it must be provided in one of the JSON/XML settings files or with `--config`.
 
 ---
 
 ## Command-Line Parameters
 
-| Parameter | Description |
-|---|---|
-| `--ccs` | Path to the CCS installation folder. It can point to the CCS root or directly to the `ccs` folder. |
-| `--config`, `--target-config` | Path to the `.ccxml` target configuration file. |
-| `--device` | Device name passed to `stune`, for example `CC1352`. |
-| `--voltage` | Fallback voltage used only if the EnergyTrace CSV does not contain voltage data. |
-| `--battery-capacity` | Battery capacity in mAh used to estimate battery lifetime from the measured average current. |
-| `--no-plot` | Set to `1` to disable the live plot while keeping capture and analysis enabled. Default: `0`. |
-| `--duration` | Capture duration in milliseconds. Use `0` for indefinite capture. |
-| `--downsample` | Downsample window in milliseconds used only for plotting. |
-| `--refresh` | Live plot refresh time in milliseconds. |
-| `--window` | Visible plot window in seconds. Use `0` to show the full capture. |
-| `--max-points` | Maximum number of points displayed in the live plot. |
-| `--et-mode` | EnergyTrace mode passed to `stune`. Usually `et`, the `et++` mode may not work for some devices. |
-
-Typical default values:
-
-```python
-DEFAULT_DEVICE = "CC1352"
-DEFAULT_VOLTAGE = 3.3
-DEFAULT_BATTERY_CAPACITY_MAH = 220.0
-DEFAULT_NO_PLOT = 0
-DEFAULT_DURATION_MS = 0.0
-DEFAULT_DOWNSAMPLE_MS = 0.01
-DEFAULT_REFRESH_MS = 10
-DEFAULT_WINDOW_S = 0.0
-DEFAULT_MAX_POINTS = 2000
-DEFAULT_ET_MODE = "et"
-```
+| Parameter | Description | Default |
+|---|---|---|
+| `--ccs` | Path to the CCS installation folder. It can point to the CCS root or directly to the `ccs` folder. | C:\ti\ccs2051 |
+| `--config`, `--target-config` | Path to the `.ccxml` target configuration file (mandatory). | None |
+| `--device` | Device name passed to `stune`, for example `CC1352`, but it will prioritize the device in the `.ccxml` file, so it's recomended to both be the same. | CC1352 |
+| `--voltage` | Fallback voltage used only if the EnergyTrace CSV does not contain voltage data. | 3.3 |
+| `--battery-capacity` | Battery capacity in mAh used to estimate battery lifetime from the measured average current. | 220.0 |
+| `--no-plot` | Set to `1` to disable the live plot while keeping capture and analysis enabled. | 0 |
+| `--duration` | Capture duration in milliseconds. Use `0` for indefinite capture. | 0 |
+| `--downsample` | Downsample window in milliseconds used only for plotting. | 0.01 |
+| `--refresh` | Live plot refresh time in milliseconds. | 10 |
+| `--window` | Visible plot window in seconds. Use `0` to show the full capture. | 0 |
+| `--max-points` | Maximum number of points displayed in the live plot. | 2000 |
+| `--et-mode` | EnergyTrace mode passed to `stune`. Usually `et`, the `et++` mode may not work for some devices. | et |
 
 The default battery capacity is `220 mAh`, a typical nominal capacity for a **CR2032** coin cell. Actual capacity varies with manufacturer, load, temperature, and cutoff voltage.
-
-The voltage value passed through `--voltage` is only used as a fallback. If the EnergyTrace CSV contains a voltage column, the voltage from the CSV is used instead.
 
 The sample frequency parameter is not used by this program because some devices use a fixed EnergyTrace sampling rate.
 
