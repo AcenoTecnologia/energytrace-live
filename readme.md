@@ -162,21 +162,13 @@ py run_energytrace_live.py
 
 The CCS path and target configuration have no built-in defaults, so both must be provided in one of the JSON/XML settings files or with `--ccs` and `--config`.
 
-The settings priority is, lower to higher:
-
-| Priority | Source |
-|---|---|
-| 1 | Built-in defaults |
-| 2 | `config.local.json` |
-| 3 | Explicit `--settings` file |
-| 4 | Command-line arguments |
-
 ---
 
 ## Command-Line Parameters
 
 | Parameter | Description | Default |
 |---|---|---|
+| `--settings` | Path to a JSON or XML settings file. | None |
 | `--ccs` | Path to the CCS installation folder. It can point to the CCS root or directly to the `ccs` folder **(Required)** | None |
 | `--config`, `--target-config` | Path to the `.ccxml` target configuration file. **(Required)** | None |
 | `--device` | Device name passed to `stune`, for example `CC1352`, the `.ccxml` file defines the actual target, so `--device` and the `.ccxml` target should match. | CC1352 |
@@ -192,7 +184,14 @@ The settings priority is, lower to higher:
 
 Both `--ccs` and `--config` settings are required. They can be provided in `config.local.json`, an explicit `--settings` file, or with the `--ccs` and `--config`/`--target-config` command-line options.
 
-The sample frequency parameter is not used by this program because some devices use a fixed EnergyTrace sampling rate.
+The settings priority is, lower to higher:
+
+| Priority | Source |
+|---|---|
+| 1 | Built-in defaults |
+| 2 | `config.local.json` |
+| 3 | Explicit `--settings` file |
+| 4 | Command-line arguments |
 
 ---
 
