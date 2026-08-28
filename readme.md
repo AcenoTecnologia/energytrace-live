@@ -73,24 +73,12 @@ plot_energytrace_live.py
 
 ## Requirements
 
-### Software
-
 - Python 3.8 or newer.
 - Texas Instruments Code Composer Studio (it was tested with 20.51 and 21.00).
 - TI `stune`, installed with CCS.
 - TI LaunchPad/XDS110 with EnergyTrace support.
 - A valid `.ccxml` target configuration file.
 - Proper USB drivers for the probe.
-
-### Python Packages
-
-Install the required Python packages:
-
-```bash
-pip install numpy pandas matplotlib PyQt6
-```
-
-`PyQt6` is required because the live plot uses the Matplotlib `QtAgg` backend.
 
 ---
 
