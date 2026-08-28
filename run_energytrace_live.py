@@ -35,14 +35,9 @@ LOCAL_SETTINGS_FILE = SCRIPT_DIR / "config.local.json"
 # ---------------------------------------------------------
 
 if IS_WINDOWS:
-    DEFAULT_CCS = Path(r"C:\ti\ccs2051")
     STUNE_EXE_NAME = "stune.exe"
 else:
-    DEFAULT_CCS = Path.home() / "ti" / "ccs2051"
     STUNE_EXE_NAME = "stune"
-
-DEFAULT_STUNE_DIR = DEFAULT_CCS / "ccs_base" / "emulation" / "analysis" / "bin" / "stune"
-STUNE_EXE = DEFAULT_STUNE_DIR / STUNE_EXE_NAME
 
 # ---------------------------------------------------------
 # EnergyTrace settings
@@ -67,7 +62,6 @@ DEFAULT_MAX_POINTS = 2000
 DEFAULT_ET_MODE = "et"
 
 DEFAULT_SETTINGS = {
-    "ccs": str(DEFAULT_CCS),
     "device": DEFAULT_DEVICE,
     "voltage": DEFAULT_VOLTAGE,
     "battery_capacity": DEFAULT_BATTERY_CAPACITY_MAH,
@@ -642,6 +636,12 @@ def parse_args():
 def main() -> int:
     args = parse_args()
     settings = build_runtime_settings(args)
+
+    if "ccs" not in settings:
+        raise SystemExit(
+            "CCS installation is required. Set 'ccs' in config.local.json "
+            "or pass --ccs."
+        )
 
     ccs_input = resolve_path(settings["ccs"])
 

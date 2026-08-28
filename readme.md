@@ -31,18 +31,7 @@ Older CCS versions (e.g., CCS v12.x) provide an EnergyTrace implementation that 
 - [Output Files](#output-files)
 - [Warm-up Routine](#warm-up-routine)
 - [Notes About Sampling and Calculations](#notes-about-sampling-and-calculations)
-- [Platform Notes](#platform-notes)
-  - [Windows](#windows-1)
-  - [Native Linux](#native-linux)
-  - [WSL](#wsl)
 - [Common Issues](#common-issues)
-  - [Unable to load `ccxmlsetup.dll`](#unable-to-load-ccxmlsetupdll)
-  - [Unable to load `libccxmlsetup.so`](#unable-to-load-libccxmlsetupso)
-  - [`BAD DATA DETECTED`](#bad-data-detected)
-  - [`Failed to open debug probe handle`](#failed-to-open-debug-probe-handle)
-  - [Live Plot Opens but No Data Appears](#live-plot-opens-but-no-data-appears)
-  - [Qt Window Does Not Open on Linux](#qt-window-does-not-open-on-linux)
-  - [Linux CCS Installer Reports Missing `libpython3.9.so.1.0`](#linux-ccs-installer-reports-missing-libpython39so10)
 - [License](#license)
 
 ---
@@ -75,7 +64,6 @@ plot_energytrace_live.py
   - total consumption;
   - selected interval consumption;
   - point inspection;
-  - current-band analysis.
 - Stores CSV files, logs, and generated `stune` command files in timestamped output folders.
 - Accepts CCS path, target configuration, device, duration, window, refresh rate, and EnergyTrace mode from the command line.
 
@@ -90,7 +78,7 @@ plot_energytrace_live.py
 - TI `stune`, installed with CCS.
 - TI LaunchPad/XDS110 with EnergyTrace support.
 - A valid `.ccxml` target configuration file.
-- Proper USB drivers to the utilized probe.
+- Proper USB drivers for the probe.
 
 ### Python Packages
 
@@ -106,7 +94,7 @@ pip install numpy pandas matplotlib PyQt6
 
 ## Installation
 
-To install the tool, you can just clone the repository to the location you want to use it, keep in mind the out file will be in the same directory as the `.py` files.
+To install the tool, you can just clone the repository to the location you want to use it, the output folder will be created in the same directory as the `.py` files.
 
 ```bash
 git clone https://github.com/AcenoTecnologia/energytrace-live.git
@@ -132,7 +120,9 @@ For example, after creating `config.local.json`, run:
 py run_energytrace_live.py
 ```
 
-The settings priority is: built-in defaults, `config.local.json`, explicit `--settings` file, and command-line arguments. The target configuration has no built-in default, so it must be provided in one of the JSON/XML settings files or with `--config`.
+The CCS path and target configuration have no built-in defaults, so both must be provided in one of the JSON/XML settings files or with `--ccs` and `--config`.
+
+The settings priority is: built-in defaults, `config.local.json`, explicit `--settings` file, and command-line arguments.
 
 ---
 
@@ -140,11 +130,11 @@ The settings priority is: built-in defaults, `config.local.json`, explicit `--se
 
 | Parameter | Description | Default |
 |---|---|---|
-| `--ccs` | Path to the CCS installation folder. It can point to the CCS root or directly to the `ccs` folder **(mandatory)**. | C:\ti\ccs2051 |
-| `--config`, `--target-config` | Path to the `.ccxml` target configuration file **(mandatory)**. | None |
-| `--device` | Device name passed to `stune`, for example `CC1352`, but it will prioritize the device in the `.ccxml` file, so it's recomended to both be the same. | CC1352 |
+| `--ccs` | Path to the CCS installation folder. It can point to the CCS root or directly to the `ccs` folder.* | None |
+| `--config`, `--target-config` | Path to the `.ccxml` target configuration file.* | None |
+| `--device` | Device name passed to `stune`, for example `CC1352`, the `.ccxml` file defines the actual target, so `--device` and the `.ccxml` target should match. | CC1352 |
 | `--voltage` | Fallback voltage used only if the EnergyTrace CSV does not contain voltage data. | 3.3 |
-| `--battery-capacity` | Battery capacity in mAh used to estimate battery lifetime from the measured average current. | 220.0 (CR2032)|
+| `--battery-capacity` | Battery capacity in mAh used to estimate battery lifetime from the measured average current. | 220.0 (CR2032) |
 | `--no-plot` | Set to `1` to disable the live plot while keeping capture and analysis enabled. | 0 |
 | `--duration` | Capture duration in milliseconds. Use `0` for indefinite capture. | 0 |
 | `--downsample` | Downsample window in milliseconds used only for plotting. | 0.01 |
@@ -154,6 +144,8 @@ The settings priority is: built-in defaults, `config.local.json`, explicit `--se
 | `--et-mode` | EnergyTrace mode passed to `stune`. Usually `et`, the `et++` mode may not work for some devices. | et |
 
 The sample frequency parameter is not used by this program because some devices use a fixed EnergyTrace sampling rate.
+
+* Both settings are required. They can be provided in config.local.json, an explicit --settings file, or with the --ccs and --config command-line options.
 
 ---
 
@@ -165,15 +157,15 @@ The plot shows only current, but voltage, power, and energy are still calculated
 
 ### Controls
 
-Controls are valid for plot mode or no-plot mode.
-
 | Action | Description |
 |---|---|
 | `q` or `Esc` | Stops the EnergyTrace capture and keeps the plot open. |
 | `t` | Prints total consumption from the beginning up to the current time. |
 | Right click | Prints current, power, and accumulated energy at the nearest point. |
 | Left click + drag | Selects an interval and prints interval statistics. |
-| Close window | Exits the live plot. |
+| Close window | Exits the live plot and stops `stune`. |
+
+`q` and `Esc` are available in both plot mode and no-plot mode.
 
 ### Terminal Output
 
@@ -246,6 +238,8 @@ Energy:                     46.917300 mJ
 
 ## Usage Examples
 
+To run the script, you must open the terminal in the directory where you cloned the repository and the `.py` files are located.
+
 ### Windows
 
 Basic example:
@@ -253,7 +247,7 @@ Basic example:
 ```bat
 py run_energytrace_live.py ^
   --ccs "C:\ti\ccs2051" ^
-  --config "C:\ti\workspace_ccstheia\zed_sw_CC1352P_2_LAUNCHXL_tirtos7_ticlang\targetConfigs\CC1352P1F3.ccxml" ^
+  --config "C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang\targetConfigs\CC1352P7.ccxml"
 ```
 
 Will generate:
@@ -288,7 +282,7 @@ With capture options:
 ```bat
 py run_energytrace_live.py ^
   --ccs "C:\ti\ccs2051" ^
-  --config "C:\ti\workspace_ccstheia\zed_sw_CC1352P_2_LAUNCHXL_tirtos7_ticlang\targetConfigs\CC1352P1F3.ccxml" ^
+  --config "C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang\targetConfigs\CC1352P7.ccxml" ^
   --device CC1352 ^
   --battery-capacity 2000 ^
   --duration 10000 ^
@@ -341,7 +335,7 @@ Basic example:
 ```bash
 python run_energytrace_live.py \
   --ccs "$HOME/ti/ccs2051" \
-  --config "$HOME/ti/CC1352P1F3.ccxml" \
+  --config "$HOME/ti/CC1352P1F3.ccxml"
 ```
 
 With capture options:

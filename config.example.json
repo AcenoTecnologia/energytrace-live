@@ -1,5 +1,5 @@
 {
-  "ccs": "C:/ti/ccs2100",
+  "ccs": "C:/ti/ccs2051",
   "target_config": "C:/path/to/your/project/targetConfigs/YourBoard.ccxml",
   "device": "CC1352",
   "voltage": 3.3,
