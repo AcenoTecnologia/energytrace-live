@@ -17,7 +17,6 @@ Older CCS versions (e.g., CCS v12.x) provide an EnergyTrace implementation that 
 - [Requirements](#requirements)
   - [Software](#software)
   - [Python Packages](#python-packages)
-- [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Local Defaults](#local-defaults)
 - [Command-Line Parameters](#command-line-parameters)
@@ -79,18 +78,6 @@ plot_energytrace_live.py
 - TI LaunchPad/XDS110 with EnergyTrace support.
 - A valid `.ccxml` target configuration file.
 - Proper USB drivers for the probe.
-
----
-
-## Installation
-
-To install the tool, you can just clone the repository to the location you want to use it, the output folder will be created in the same directory as the `.py` files.
-
-```bash
-git clone https://github.com/AcenoTecnologia/energytrace-live.git
-```
-
-The scripts can be placed in any directory, as long as both files are kept together in the same folder.
 
 ---
 
