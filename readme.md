@@ -18,6 +18,7 @@ Older CCS versions (e.g., CCS v12.x) provide an EnergyTrace implementation that 
   - [Software](#software)
   - [Python Packages](#python-packages)
 - [Installation](#installation)
+- [Quick Start](#quick-start)
 - [Local Defaults](#local-defaults)
 - [Command-Line Parameters](#command-line-parameters)
 - [Live Plot](#live-plot)
@@ -104,6 +105,33 @@ The scripts can be placed in any directory, as long as both files are kept toget
 
 ---
 
+## Quick Start
+
+From the directory where you want to keep the project, run:
+
+```bash
+git clone https://github.com/AcenoTecnologia/energytrace-live.git
+cd energytrace-live
+python -m pip install -r requirements.txt
+```
+
+Then create the local configuration file and start the runner:
+
+```text
+copy config.example.json config.local.json  # Windows
+cp config.example.json config.local.json    # Linux
+```
+
+Edit `config.local.json` with the settings you want to use before running the tool.
+
+To run the tool:
+
+```bash
+python run_energytrace_live.py
+```
+
+---
+
 ## Local Defaults
 
 To avoid repeating machine-specific options, copy `config.example.json` to `config.local.json` and edit the local file with your CCS and target configuration paths:
@@ -111,6 +139,17 @@ To avoid repeating machine-specific options, copy `config.example.json` to `conf
 ```bat
 copy config.example.json config.local.json
 ```
+
+At minimum, edit these two values:
+
+```json
+{
+  "ccs": "C:/path/to/your/ccs",
+  "target_config": "C:/path/to/your/project/targetConfigs/YourBoard.ccxml"
+}
+```
+
+The remaining settings from `config.example.json` can be kept or adjusted as needed.
 
 The runner automatically loads `config.local.json` when it exists. This file is ignored by Git, so each user can keep different local paths without changing the repository. Command-line arguments override the local file, and an explicit `--settings` file overrides the local file as well.
 
@@ -122,7 +161,14 @@ py run_energytrace_live.py
 
 The CCS path and target configuration have no built-in defaults, so both must be provided in one of the JSON/XML settings files or with `--ccs` and `--config`.
 
-The settings priority is: built-in defaults, `config.local.json`, explicit `--settings` file, and command-line arguments.
+The settings priority is, lower to higher:
+
+| Priority | Source |
+|---|---|
+| 1 | Built-in defaults |
+| 2 | `config.local.json` |
+| 3 | Explicit `--settings` file |
+| 4 | Command-line arguments |
 
 ---
 
@@ -130,8 +176,8 @@ The settings priority is: built-in defaults, `config.local.json`, explicit `--se
 
 | Parameter | Description | Default |
 |---|---|---|
-| `--ccs` | Path to the CCS installation folder. It can point to the CCS root or directly to the `ccs` folder.* | None |
-| `--config`, `--target-config` | Path to the `.ccxml` target configuration file.* | None |
+| `--ccs` | Path to the CCS installation folder. It can point to the CCS root or directly to the `ccs` folder[^required] | None |
+| `--config`, `--target-config` | Path to the `.ccxml` target configuration file.[^required] | None |
 | `--device` | Device name passed to `stune`, for example `CC1352`, the `.ccxml` file defines the actual target, so `--device` and the `.ccxml` target should match. | CC1352 |
 | `--voltage` | Fallback voltage used only if the EnergyTrace CSV does not contain voltage data. | 3.3 |
 | `--battery-capacity` | Battery capacity in mAh used to estimate battery lifetime from the measured average current. | 220.0 (CR2032) |
@@ -145,7 +191,7 @@ The settings priority is: built-in defaults, `config.local.json`, explicit `--se
 
 The sample frequency parameter is not used by this program because some devices use a fixed EnergyTrace sampling rate.
 
-* Both settings are required. They can be provided in config.local.json, an explicit --settings file, or with the --ccs and --config command-line options.
+[^required]: Both settings are required. They can be provided in config.local.json, an explicit --settings file, or with the --ccs and --config command-line options.
 
 ---
 
