@@ -163,6 +163,8 @@ The plot shows only current, but voltage, power, and energy are still calculated
 
 ### Controls
 
+Controls are valid for plot mode or no-plot mode.
+
 | Action | Description |
 |---|---|
 | `q` or `Esc` | Stops the EnergyTrace capture and keeps the plot open. |
@@ -170,6 +172,73 @@ The plot shows only current, but voltage, power, and energy are still calculated
 | Right click | Prints current, power, and accumulated energy at the nearest point. |
 | Left click + drag | Selects an interval and prints interval statistics. |
 | Close window | Exits the live plot. |
+
+### Terminal Output
+
+During acquisition, the live plot prints an updating status line:
+
+```text
+Pts=125000 | t=1.25s | I=5.620mA | Iavg=5.604mA | E=23.105mJ | Pavg=18.493mW
+```
+
+| Field | Meaning |
+|---|---|
+| `Pts` | Number of processed points. |
+| `t` | Current capture time. |
+| `I` | Current at the latest point. |
+| `Iavg` | Average current since the beginning. |
+| `E` | Accumulated energy since the beginning. |
+| `Pavg` | Average power since the beginning. |
+
+### Interval Analysis
+
+Selecting an interval in the graphic prints a detailed summary:
+
+```text
+=========================================================
+INTERVAL
+=========================================================
+Start:                      0.000004 s
+End:                        10.047180 s
+Duration:                   10.047176 s
+
+Voltage
+  Mean:                     3.300000 V
+
+Current
+  Mean:                     3.166208 mA
+  Min:                      1.163987 mA
+  Max:                      20.081163 mA
+
+Power
+  Mean:                     10.448486 mW
+  Min:                      3.841157 mW
+  Max:                      66.267838 mW
+
+Energy
+  Energy in Interval:       104.977774 mJ
+  Energy Start:             0.000000 mJ
+  Energy End:               104.977774 mJ
+
+Battery Lifetime
+  Estimate:                 2 m 9 d 11 h 37 min
+=========================================================
+```
+
+### Point Analysis
+
+Right clicking on the plot prints the nearest measured point:
+
+```text
+=========================================================
+POINT
+=========================================================
+Time:                       2.514328 s
+Current:                    5.620000 mA
+Power:                      18.546000 mW
+Energy:                     46.917300 mJ
+=========================================================
+```
 
 ---
 
@@ -271,7 +340,6 @@ Basic example:
 python run_energytrace_live.py \
   --ccs "$HOME/ti/ccs2051" \
   --config "$HOME/ti/CC1352P1F3.ccxml" \
-  --device CC1352
 ```
 
 With capture options:
@@ -280,88 +348,15 @@ With capture options:
 python run_energytrace_live.py \
   --ccs "$HOME/ti/ccs2051" \
   --config "$HOME/ti/CC1352P1F3.ccxml" \
+  --battery-capacity 2000 \
   --device CC1352 \
   --duration 10000 \
   --window 5 \
   --downsample 0.01 \
   --refresh 10 \
   --max-points 2000 \
-  --et-mode et
-```
-
----
-
-### Terminal Output
-
-During acquisition, the live plot prints an updating status line:
-
-```text
-Pts=125000 | t=1.25s | I=5.620mA | Iavg=5.604mA | E=23.105mJ | Pavg=18.493mW
-```
-
-| Field | Meaning |
-|---|---|
-| `Pts` | Number of processed points. |
-| `t` | Current capture time. |
-| `I` | Current at the latest point. |
-| `Iavg` | Average current since the beginning. |
-| `E` | Accumulated energy since the beginning. |
-| `Pavg` | Average power since the beginning. |
-
-### Interval Analysis
-
-Selecting an interval prints a detailed summary:
-
-```text
-=========================================================
-INTERVAL
-=========================================================
-Start:                      0.000004 s
-End:                        10.047180 s
-Duration:                   10.047176 s
-
-Voltage
-  Mean:                     3.300000 V
-
-Current
-  Mean:                     3.166208 mA
-  Min:                      1.163987 mA
-  Max:                      20.081163 mA
-
-Power
-  Mean:                     10.448486 mW
-  Min:                      3.841157 mW
-  Max:                      66.267838 mW
-
-Energy
-  Energy in Interval:       104.977774 mJ
-  Energy Start:             0.000000 mJ
-  Energy End:               104.977774 mJ
-
-Battery Lifetime
-  Estimate:                 not calculated
-=========================================================
-```
-
-Energy is calculated from power over time.
-
-```text
-mW * s = mJ
-```
-
-### Point Analysis
-
-Right clicking on the plot prints the nearest measured point:
-
-```text
-=========================================================
-POINT
-=========================================================
-Time:                       2.514328 s
-Current:                    5.620000 mA
-Power:                      18.546000 mW
-Energy:                     46.917300 mJ
-=========================================================
+  --et-mode et \
+  --no-plot 0
 ```
 
 ---
@@ -420,12 +415,6 @@ If `BAD DATA DETECTED` still appears, try to disconnect and reconnect the Launch
 ---
 
 ## Notes About Sampling and Calculations
-
-EnergyTrace CSV current values are interpreted as nanoamps and converted to amps internally:
-
-```python
-current_A = current_nA * 1e-9
-```
 
 Voltage is read from the CSV when available. If the CSV has no voltage column, the value passed through `--voltage` is used as fallback.
 
