@@ -9,6 +9,7 @@ import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from datetime import datetime
+from typing import Optional, TextIO, Tuple
 
 
 # =========================================================
@@ -35,20 +36,9 @@ LOCAL_SETTINGS_FILE = SCRIPT_DIR / "config.local.json"
 
 if IS_WINDOWS:
     DEFAULT_CCS = Path(r"C:\ti\ccs2051")
-    DEFAULT_CONFIG = Path(
-        r"C:\ti\workspace_ccstheia\zed_sw_CC1352P_2_LAUNCHXL_tirtos7_ticlang\targetConfigs\CC1352P1F3.ccxml"
-    )
     STUNE_EXE_NAME = "stune.exe"
 else:
     DEFAULT_CCS = Path.home() / "ti" / "ccs2051"
-    DEFAULT_CONFIG = (
-        Path.home()
-        / "ti"
-        / "workspace_ccstheia"
-        / "zed_sw_CC1352P_2_LAUNCHXL_tirtos7_ticlang"
-        / "targetConfigs"
-        / "CC1352P1F3.ccxml"
-    )
     STUNE_EXE_NAME = "stune"
 
 DEFAULT_STUNE_DIR = DEFAULT_CCS / "ccs_base" / "emulation" / "analysis" / "bin" / "stune"
@@ -78,7 +68,6 @@ DEFAULT_ET_MODE = "et"
 
 DEFAULT_SETTINGS = {
     "ccs": str(DEFAULT_CCS),
-    "target_config": str(DEFAULT_CONFIG),
     "device": DEFAULT_DEVICE,
     "voltage": DEFAULT_VOLTAGE,
     "battery_capacity": DEFAULT_BATTERY_CAPACITY_MAH,
@@ -254,14 +243,6 @@ def format_duration(value: float) -> str:
     return str(value)
 
 
-def stune_path(path: Path) -> str:
-    path_str = str(path.resolve()).replace("\\", "/")
-
-    if " " in path_str:
-        return f'"{path_str}"'
-
-    return path_str
-
 def build_environment(ccs: Path, stune_dir: Path) -> dict:
     env = os.environ.copy()
 
@@ -361,7 +342,7 @@ def start_stune_process(
     env: dict,
     stune_exe: Path,
     work_dir: Path,
-) -> subprocess.Popen:
+) -> Tuple[subprocess.Popen, TextIO]:
     log_path.parent.mkdir(parents=True, exist_ok=True)
 
     log_file = open(log_path, "w", encoding="utf-8", errors="ignore")
@@ -383,46 +364,47 @@ def start_stune_process(
     )
 
     try:
-        proc.stdin.write(command_text)
-        proc.stdin.flush()
-        proc.stdin.close()
+        if proc.stdin is not None:
+            proc.stdin.write(command_text)
+            proc.stdin.flush()
+            proc.stdin.close()
     except Exception:
         pass
 
-    proc._log_file = log_file
-
-    return proc
+    return proc, log_file
 
 
-def stop_process(proc: subprocess.Popen, name: str = "process") -> None:
+def stop_process(
+    proc: Optional[subprocess.Popen],
+    name: str = "process",
+    log_file: Optional[TextIO] = None,
+) -> None:
     if proc is None:
+        if log_file is not None:
+            log_file.close()
         return
 
-    if proc.poll() is not None:
-        return
+    if proc.poll() is None:
+        print(f"Stopping {name}...")
 
-    print(f"Stopping {name}...")
-
-    try:
-        if IS_WINDOWS:
-            try:
-                proc.send_signal(signal.CTRL_BREAK_EVENT)
-            except Exception:
-                proc.terminate()
-        else:
-            proc.send_signal(signal.SIGINT)
-
-        proc.wait(timeout=5)
-
-    except Exception:
-        print(f"{name} did not stop gracefully. Killing...")
         try:
-            proc.kill()
-            proc.wait(timeout=5)
-        except Exception:
-            pass
+            if IS_WINDOWS:
+                try:
+                    proc.send_signal(signal.CTRL_BREAK_EVENT)
+                except Exception:
+                    proc.terminate()
+            else:
+                proc.send_signal(signal.SIGINT)
 
-    log_file = getattr(proc, "_log_file", None)
+            proc.wait(timeout=5)
+
+        except Exception:
+            print(f"{name} did not stop gracefully. Killing...")
+            try:
+                proc.kill()
+                proc.wait(timeout=5)
+            except Exception:
+                pass
 
     if log_file is not None:
         try:
@@ -662,6 +644,13 @@ def main() -> int:
     settings = build_runtime_settings(args)
 
     ccs_input = resolve_path(settings["ccs"])
+
+    if "target_config" not in settings:
+        raise SystemExit(
+            "Target configuration is required. Set 'target_config' in "
+            "config.local.json or pass --config."
+        )
+
     config = resolve_path(settings["target_config"])
 
     ccs, stune_dir, stune_exe = get_stune_paths(ccs_input)
@@ -796,7 +785,7 @@ def main() -> int:
 
     capture_cmd_file.write_text(capture_commands, encoding="utf-8")
 
-    stune_proc = start_stune_process(
+    stune_proc, stune_log_file = start_stune_process(
         command_text=capture_commands,
         log_path=capture_log,
         env=env,
@@ -812,14 +801,14 @@ def main() -> int:
         print(f"Expected log: {capture_log}")
         print("=========================================================")
         print()
-        stop_process(stune_proc, "stune")
+        stop_process(stune_proc, "stune", stune_log_file)
         return 1
 
     time.sleep(0.5)
 
     if log_has_no_connected_device(capture_log):
         print_no_device_error(capture_log)
-        stop_process(stune_proc, "stune")
+        stop_process(stune_proc, "stune", stune_log_file)
         return 1
 
     if log_has_bad_data(capture_log):
@@ -836,7 +825,7 @@ def main() -> int:
         print("- Check if another program is using the XDS110")
         print("=========================================================")
         print()
-        stop_process(stune_proc, "stune")
+        stop_process(stune_proc, "stune", stune_log_file)
         return 1
 
     # -----------------------------------------------------
@@ -900,7 +889,7 @@ def main() -> int:
         while True:
             if log_has_no_connected_device(capture_log):
                 print_no_device_error(capture_log)
-                stop_process(stune_proc, "stune")
+                stop_process(stune_proc, "stune", stune_log_file)
                 break
 
             if log_has_bad_data(capture_log):
@@ -912,13 +901,13 @@ def main() -> int:
                 print("Try disconnecting and reconnecting the device.")
                 print("=========================================================")
                 print()
-                stop_process(stune_proc, "stune")
+                stop_process(stune_proc, "stune", stune_log_file)
                 break
 
             if stop_file.exists():
                 print()
                 print("Stop requested by LivePlot.")
-                stop_process(stune_proc, "stune")
+                stop_process(stune_proc, "stune", stune_log_file)
                 break
 
             if stune_proc.poll() is not None:
@@ -934,7 +923,7 @@ def main() -> int:
             if not no_plot and live_proc.poll() is not None:
                 print()
                 print("LivePlot was closed.")
-                stop_process(stune_proc, "stune")
+                stop_process(stune_proc, "stune", stune_log_file)
                 break
 
             time.sleep(1)
@@ -942,7 +931,7 @@ def main() -> int:
     except KeyboardInterrupt:
         print()
         print("Keyboard interrupt received.")
-        stop_process(stune_proc, "stune")
+        stop_process(stune_proc, "stune", stune_log_file)
 
         if live_proc.poll() is None:
             stop_process(live_proc, "LivePlot")
