@@ -4,11 +4,14 @@ A Python-based tool to automate **Texas Instruments EnergyTrace** measurements u
 
 The project is designed to work on **Windows** and **native Linux** when a valid Code Composer Studio installation and XDS110 debug probe are available.
 
+The EnergyTrace feature in CCS 20.x+ requires an active debug connection to the target device. Therefore, the measured current and power may be higher than those obtained with EnergyTrace Live, since the debug interface and related circuitry can contribute to the overall power consumption. Besides that, you can't run it in real time and the total time it runs is really limited.
+
+Older CCS versions (e.g., CCS v12.x) provide an EnergyTrace implementation that can operate without an active debug session, resulting in measurements that are expected to be closer to those obtained with EnergyTrace Live, but it's a legacy version.
+
 ---
 
 ## Table of Contents
 
-- [Motivation](#motivation)
 - [Overview](#overview)
 - [Features](#features)
 - [Requirements](#requirements)
@@ -17,31 +20,30 @@ The project is designed to work on **Windows** and **native Linux** when a valid
 - [Installation](#installation)
 - [Local Defaults](#local-defaults)
 - [Command-Line Parameters](#command-line-parameters)
-- [Command-Line Usage](#command-line-usage)
-  - [Windows](#windows)
-  - [Linux](#linux)
-- [Warm-up Routine](#warm-up-routine)
 - [Live Plot](#live-plot)
   - [Controls](#controls)
   - [Terminal Output](#terminal-output)
   - [Interval Analysis](#interval-analysis)
   - [Point Analysis](#point-analysis)
+- [Usage Examples](#usage-examples)
+  - [Windows](#windows)
+  - [Linux](#linux)
 - [Output Files](#output-files)
+- [Warm-up Routine](#warm-up-routine)
 - [Notes About Sampling and Calculations](#notes-about-sampling-and-calculations)
 - [Platform Notes](#platform-notes)
   - [Windows](#windows-1)
   - [Native Linux](#native-linux)
   - [WSL](#wsl)
 - [Common Issues](#common-issues)
+  - [Unable to load `ccxmlsetup.dll`](#unable-to-load-ccxmlsetupdll)
+  - [Unable to load `libccxmlsetup.so`](#unable-to-load-libccxmlsetupso)
+  - [`BAD DATA DETECTED`](#bad-data-detected)
+  - [`Failed to open debug probe handle`](#failed-to-open-debug-probe-handle)
+  - [Live Plot Opens but No Data Appears](#live-plot-opens-but-no-data-appears)
+  - [Qt Window Does Not Open on Linux](#qt-window-does-not-open-on-linux)
+  - [Linux CCS Installer Reports Missing `libpython3.9.so.1.0`](#linux-ccs-installer-reports-missing-libpython39so10)
 - [License](#license)
-
---- 
-
-# Motivation
-
-The EnergyTrace feature in CCS 20 requires an active debug connection to the target device. Therefore, the measured current and power may be higher than those obtained with EnergyTrace Live, since the debug interface and related circuitry can contribute to the overall power consumption. Besides that, you can't run it in real time and the total time it runs is really limited.
-
-Older CCS versions (e.g., CCS v12.x) provide an EnergyTrace implementation that can operate without an active debug session, resulting in measurements that are expected to be closer to those obtained with EnergyTrace Live, but it's a legacy version.
 
 ---
 
