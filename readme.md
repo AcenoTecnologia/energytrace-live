@@ -176,8 +176,8 @@ The settings priority is, lower to higher:
 
 | Parameter | Description | Default |
 |---|---|---|
-| `--ccs` | Path to the CCS installation folder. It can point to the CCS root or directly to the `ccs` folder[^required] | None |
-| `--config`, `--target-config` | Path to the `.ccxml` target configuration file.[^required] | None |
+| `--ccs` | Path to the CCS installation folder. It can point to the CCS root or directly to the `ccs` folder **(Required)** | None |
+| `--config`, `--target-config` | Path to the `.ccxml` target configuration file. **(Required)** | None |
 | `--device` | Device name passed to `stune`, for example `CC1352`, the `.ccxml` file defines the actual target, so `--device` and the `.ccxml` target should match. | CC1352 |
 | `--voltage` | Fallback voltage used only if the EnergyTrace CSV does not contain voltage data. | 3.3 |
 | `--battery-capacity` | Battery capacity in mAh used to estimate battery lifetime from the measured average current. | 220.0 (CR2032) |
@@ -189,9 +189,9 @@ The settings priority is, lower to higher:
 | `--max-points` | Maximum number of points displayed in the live plot. | 2000 |
 | `--et-mode` | EnergyTrace mode passed to `stune`. Usually `et`, the `et++` mode may not work for some devices. | et |
 
-The sample frequency parameter is not used by this program because some devices use a fixed EnergyTrace sampling rate.
+Both `--ccs` and `--config` settings are required. They can be provided in `config.local.json`, an explicit `--settings` file, or with the `--ccs` and `--config`/`--target-config` command-line options.
 
-[^required]: Both settings are required. They can be provided in config.local.json, an explicit --settings file, or with the --ccs and --config command-line options.
+The sample frequency parameter is not used by this program because some devices use a fixed EnergyTrace sampling rate.
 
 ---
 
