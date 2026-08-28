@@ -229,37 +229,6 @@ python run_energytrace_live.py \
 
 ---
 
-## Local Defaults
-
-To avoid repeating machine-specific options, copy `config.example.json` to `config.local.json` and edit the local file with your CCS and target configuration paths:
-
-```bat
-copy config.example.json config.local.json
-```
-
-At minimum, edit these two values:
-
-```json
-{
-  "ccs": "C:/path/to/your/ccs",
-  "target_config": "C:/path/to/your/project/targetConfigs/YourBoard.ccxml"
-}
-```
-
-The remaining settings from `config.example.json` can be kept or adjusted as needed.
-
-The runner automatically loads `config.local.json` when it exists. This file is ignored by Git, so each user can keep different local paths without changing the repository. Command-line arguments override the local file, and an explicit `--settings` file overrides the local file as well.
-
-For example, after creating `config.local.json`, run:
-
-```bat
-py run_energytrace_live.py
-```
-
-The CCS path and target configuration have no built-in defaults, so both must be provided in one of the JSON/XML settings files or with `--ccs` and `--config`.
-
----
-
 ## Command-Line Parameters
 
 | Parameter | Description | Default |
@@ -387,6 +356,37 @@ Example:
 ```bat
 py run_energytrace_live.py --no-plot 1
 ```
+
+---
+
+## Local Defaults
+
+To avoid repeating machine-specific options, copy `config.example.json` to `config.local.json` and edit the local file with your CCS and target configuration paths:
+
+```bat
+copy config.example.json config.local.json
+```
+
+At minimum, edit these two values:
+
+```json
+{
+  "ccs": "C:/path/to/your/ccs",
+  "target_config": "C:/path/to/your/project/targetConfigs/YourBoard.ccxml"
+}
+```
+
+The remaining settings from `config.example.json` can be kept or adjusted as needed.
+
+The runner automatically loads `config.local.json` when it exists. This file is ignored by Git, so each user can keep different local paths without changing the repository. Command-line arguments override the local file, and an explicit `--settings` file overrides the local file as well.
+
+For example, after creating `config.local.json`, run:
+
+```bat
+py run_energytrace_live.py
+```
+
+The CCS path and target configuration have no built-in defaults, so both must be provided in one of the JSON/XML settings files or with `--ccs` and `--config`.
 
 ---
 
