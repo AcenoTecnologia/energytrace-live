@@ -26,6 +26,7 @@ Older CCS versions (e.g., CCS v12.x) provide an EnergyTrace implementation that 
   - [Terminal Output](#terminal-output)
   - [Interval Analysis](#interval-analysis)
   - [Point Analysis](#point-analysis)
+- [No-Plot](#no-plot)
 - [Usage Examples](#usage-examples)
   - [Windows](#windows)
   - [Linux](#linux)
@@ -211,8 +212,6 @@ The plot shows only current, but voltage, power, and energy are still calculated
 | Left click + drag | Selects an interval and prints interval statistics. |
 | Close window | Exits the live plot and stops `stune`. |
 
-`q` and `Esc` are available in both plot mode and no-plot mode.
-
 ### Terminal Output
 
 During acquisition, the live plot prints an updating status line:
@@ -278,6 +277,20 @@ Current:                    5.620000 mA
 Power:                      18.546000 mW
 Energy:                     46.917300 mJ
 =========================================================
+```
+
+---
+
+## No-Plot
+
+Set `--no-plot 1` to run the capture and analysis without opening a live plot window. CSV reading, terminal output, energy calculations, and battery lifetime estimates remain active.
+
+Press `q` or `Esc` in the terminal to stop an indefinite capture and print the final analysis.
+
+Example:
+
+```bat
+py run_energytrace_live.py --no-plot 1
 ```
 
 ---
