@@ -81,7 +81,7 @@ copy config.example.json config.local.json  # Windows
 cp config.example.json config.local.json    # Linux
 ```
 
-Edit `config.local.json` with the settings you want to use before running the tool.
+Edit `config.local.json` with the settings you want to use before running the tool. You need to edit at least "ccs" and "target_config" fields.
 
 To run the tool:
 
@@ -93,7 +93,7 @@ python run_energytrace_live.py
 
 ## Usage Examples
 
-To run the script, you must open the terminal in the directory where you cloned the repository and the `.py` files are located.
+To run the script, you must open the terminal in the directory where you cloned the repository and the `.py` files are located. The only two required parameters to start using the tool are the path to the CCS installation folder and the path to the `.ccxml` target configuration file used by the user application.
 
 ### Windows
 
@@ -218,9 +218,9 @@ python run_energytrace_live.py \
 
 | Parameter | Description | Default |
 |---|---|---|
-| `--settings` | Path to a JSON or XML settings file. | None |
 | `--ccs` | Path to the CCS installation folder. It can point to the CCS root or directly to the `ccs` folder **(Required)** | None |
 | `--config`, `--target-config` | Path to the `.ccxml` target configuration file. **(Required)** | None |
+| `--settings` | Path to a JSON or XML settings file. | None |
 | `--device` | Device name passed to `stune`, for example `CC1352`, the `.ccxml` file defines the actual target, so `--device` and the `.ccxml` target should match. | CC1352 |
 | `--voltage` | Fallback voltage used only if the EnergyTrace CSV does not contain voltage data. | 3.3 |
 | `--battery-capacity` | Battery capacity in mAh used to estimate battery lifetime from the measured average current. | 220.0 (CR2032) |
@@ -367,7 +367,7 @@ At minimum, edit these two values:
 
 The remaining settings from `config.example.json` can be kept or adjusted as needed.
 
-The runner automatically loads `config.local.json` when it exists. This file is ignored by Git, so each user can keep different local paths without changing the repository. Command-line arguments override the local file, and an explicit `--settings` file overrides the local file as well.
+The runner automatically loads `config.local.json` when it exists. Command-line arguments override the local file, and an explicit `--settings` file overrides the local file as well.
 
 For example, after creating `config.local.json`, run:
 
