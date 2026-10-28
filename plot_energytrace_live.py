@@ -717,7 +717,7 @@ def main():
 
     last_status_len = 0
 
-    fig_num = plt.get_fignums()[0]
+    fig_num = None if no_plot else plt.get_fignums()[0]
 
     # Loop principal de atualização do gráfico
     while (no_plot and state["running"]) or (
