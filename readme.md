@@ -141,15 +141,17 @@ With capture options:
 py run_energytrace_live.py ^
   --ccs "C:\ti\ccs2051" ^
   --config "C:\ti\workspace_ccstheia\timerled_LP_CC1352P7_1_tirtos7_ticlang\targetConfigs\CC1352P7.ccxml" ^
+  --settings "C:\energytrace-live\config.json" ^
   --device CC1352 ^
+  --voltage 3.3 ^
   --battery-capacity 2000 ^
+  --no-plot 0 ^
   --duration 10000 ^
-  --window 5 ^
   --downsample 0.01 ^
   --refresh 10 ^
+  --window 5 ^
   --max-points 2000 ^
-  --et-mode et ^
-  --no-plot 0
+  --et-mode et
 ```
 
 Will generate:
@@ -204,15 +206,17 @@ With capture options:
 python run_energytrace_live.py \
   --ccs "$HOME/ti/ccs2051" \
   --config "$HOME/ti/CC1352P1F3.ccxml" \
-  --battery-capacity 2000 \
+  --settings "$HOME/energytrace-live/config.json" \
   --device CC1352 \
+  --voltage 3.3 \
+  --battery-capacity 2000 \
+  --no-plot 0 \
   --duration 10000 \
-  --window 5 \
   --downsample 0.01 \
   --refresh 10 \
+  --window 5 \
   --max-points 2000 \
-  --et-mode et \
-  --no-plot 0
+  --et-mode et
 ```
 
 ---
@@ -229,7 +233,7 @@ python run_energytrace_live.py \
 | `--battery-capacity` | Battery capacity in mAh used to estimate battery lifetime from the measured average current. | 220.0 (CR2032) |
 | `--no-plot` | Set to `1` to disable the live plot while keeping capture and analysis enabled. | 0 |
 | `--duration` | Capture duration in milliseconds. Use `0` for indefinite capture. | 0 |
-| `--downsample` | Downsample window in milliseconds used only for plotting. | 0.01 |
+| `--downsample` | Downsample window in milliseconds used only for plotting. If you are experiencing performance issues, try increasing this value. | 0.01 |
 | `--refresh` | Live plot refresh time in milliseconds. | 10 |
 | `--window` | Visible plot window in seconds. Use `0` to show the full capture. | 0 |
 | `--max-points` | Maximum number of points displayed in the live plot. | 2000 |
