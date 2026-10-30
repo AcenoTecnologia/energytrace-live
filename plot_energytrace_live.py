@@ -414,12 +414,13 @@ def main():
         voltage_fallback=args.voltage
     )
 
-    # Inicializa listas para armazenar os dados de tempo, corrente e energia
-    time_data = []
-    voltage_data = []
-    current_data = []
-    power_data = []
-    energy_data = []
+    # Keep raw plot samples separate from the compressed data sent to Matplotlib.
+    capture_time_data = []
+    capture_current_data = []
+    total_points = 0
+    first_time_s = None
+    current_integral_mA_s = 0.0
+    last_current_mA = None
 
     last_energy_J = 0.0
     last_time_s = None
@@ -449,19 +450,47 @@ def main():
         "final_total_printed": False
     }
 
+    def load_capture_data():
+        history_reader = LiveCsvReader(
+            folder=reader.folder,
+            prefix=reader.prefix,
+            voltage_fallback=reader.voltage_fallback,
+        )
+        data = history_reader.read_new_data()
+
+        if data.empty:
+            return data
+
+        return data.drop_duplicates(subset=["time_s"], keep="last").sort_values("time_s")
+
+    def get_analysis_data():
+        data = load_capture_data()
+
+        if data.empty:
+            return None
+
+        t_arr = data["time_s"].to_numpy(dtype=np.float64)
+        v_arr = data["voltage_V"].to_numpy(dtype=np.float64)
+        i_arr = data["current_A"].to_numpy(dtype=np.float64) * 1000.0
+        p_arr = v_arr * i_arr
+        e_arr = np.zeros_like(t_arr)
+
+        if len(t_arr) > 1:
+            e_arr[1:] = np.cumsum(0.5 * (p_arr[1:] + p_arr[:-1]) * np.diff(t_arr))
+
+        return t_arr, v_arr, i_arr, p_arr, e_arr
+
     def analyze_interval(t1, t2, label="INTERVAL"):
-        if len(time_data) < 2:
+        analysis_data = get_analysis_data()
+
+        if analysis_data is None or len(analysis_data[0]) < 2:
             print("\nThere is still not enough data to analyze the interval.")
             return
 
         if t2 < t1:
             t1, t2 = t2, t1
 
-        t_arr = np.asarray(time_data, dtype=np.float64)
-        v_arr = np.asarray(voltage_data, dtype=np.float64)
-        i_arr = np.asarray(current_data, dtype=np.float64)
-        p_arr = np.asarray(power_data, dtype=np.float64)
-        e_arr = np.asarray(energy_data, dtype=np.float64)
+        t_arr, v_arr, i_arr, p_arr, e_arr = analysis_data
 
         t1 = max(t1, float(t_arr[0]))
         t2 = min(t2, float(t_arr[-1]))
@@ -554,18 +583,20 @@ def main():
 
 
     def analyze_point(t_click):
-        if len(time_data) < 1:
+        analysis_data = get_analysis_data()
+
+        if analysis_data is None or len(analysis_data[0]) < 1:
             print("\nThere is still not enough data to analyze the point.")
             return
 
-        t_arr = np.asarray(time_data, dtype=np.float64)
+        t_arr, _v_arr, i_arr, p_arr, e_arr = analysis_data
 
         idx = int(np.argmin(np.abs(t_arr - t_click)))
 
-        t = time_data[idx]
-        current_mA = current_data[idx]
-        power_mW = power_data[idx]
-        energy_mJ = energy_data[idx]
+        t = t_arr[idx]
+        current_mA = i_arr[idx]
+        power_mW = p_arr[idx]
+        energy_mJ = e_arr[idx]
 
         print()
         print("=========================================================")
@@ -600,10 +631,10 @@ def main():
             print()
             print(f"Stop file created: {stop_file}")
 
-        if len(time_data) >= 2 and not state["final_total_printed"]:
+        if total_points >= 2 and first_time_s is not None and last_time_s is not None and not state["final_total_printed"]:
             analyze_interval(
-                time_data[0],
-                time_data[-1],
+                first_time_s,
+                last_time_s,
                 label="TOTAL UNTIL STOP",
             )
             state["final_total_printed"] = True
@@ -625,10 +656,10 @@ def main():
             request_stop()
 
         elif event.key == "t":
-            if len(time_data) >= 2:
+            if total_points >= 2 and first_time_s is not None and last_time_s is not None:
                 analyze_interval(
-                    time_data[0],
-                    time_data[-1],
+                    first_time_s,
+                    last_time_s,
                     label="TOTAL",
                 )
             else:
@@ -749,6 +780,7 @@ def main():
         i = new_data["current_A"].to_numpy(dtype=np.float64)
 
         p = v * i
+        current_mA = i * 1000.0
 
         if len(t) == 0:
             plt.pause(args.refresh_ms / 1000.0)
@@ -757,43 +789,45 @@ def main():
         energy_block = np.empty_like(t)
 
         if last_time_s is None:
+            first_time_s = float(t[0])
             energy_block[0] = last_energy_J
         else:
             dt0 = t[0] - last_time_s
             energy_block[0] = last_energy_J + 0.5 * (p[0] + last_power_W) * dt0
+            current_integral_mA_s += 0.5 * (current_mA[0] + last_current_mA) * dt0
 
         if len(t) > 1:
             dt_vec = np.diff(t)
             e_inc = 0.5 * (p[1:] + p[:-1]) * dt_vec
             energy_block[1:] = energy_block[0] + np.cumsum(e_inc)
+            current_integral_mA_s += float(
+                np.sum(0.5 * (current_mA[1:] + current_mA[:-1]) * dt_vec)
+            )
 
-        time_data.extend(t.tolist())
-        voltage_data.extend(v.tolist())
-        current_data.extend((i * 1000.0).tolist())
-        power_data.extend((p * 1000.0).tolist())
-        energy_data.extend((energy_block * 1000.0).tolist())
+        total_points += len(t)
 
         last_time_s = float(t[-1])
         last_power_W = float(p[-1])
         last_energy_J = float(energy_block[-1])
-
-        plot_time_src = time_data
-        plot_current_src = current_data
-
-        if args.window_s > 0 and time_data:
-            tmax = time_data[-1]
-            tmin = tmax - args.window_s
-
-            keep = [idx for idx, t_val in enumerate(time_data) if t_val >= tmin]
-
-            plot_time_src = [time_data[idx] for idx in keep]
-            plot_current_src = [current_data[idx] for idx in keep]
+        last_current_mA = float(current_mA[-1])
 
         if not no_plot:
+            capture_time_data.extend(t.tolist())
+            capture_current_data.extend(current_mA.tolist())
+
+            if args.window_s > 0:
+                tmin = last_time_s - args.window_s
+                first_kept = next(
+                    (idx for idx, value in enumerate(capture_time_data) if value >= tmin),
+                    len(capture_time_data),
+                )
+                capture_time_data = capture_time_data[first_kept:]
+                capture_current_data = capture_current_data[first_kept:]
+
             plot_df = pd.DataFrame({
-                "time_s": np.asarray(plot_time_src, dtype=np.float64),
-                "voltage_V": np.ones(len(plot_time_src), dtype=np.float64),
-                "current_A": np.asarray(plot_current_src, dtype=np.float64) / 1000.0,
+                "time_s": np.asarray(capture_time_data, dtype=np.float64),
+                "voltage_V": np.ones(len(capture_time_data), dtype=np.float64),
+                "current_A": np.asarray(capture_current_data, dtype=np.float64) / 1000.0,
             })
 
             plot_df = downsample_for_plot(
@@ -801,12 +835,9 @@ def main():
                 args.downsample_ms
             )
 
-            plot_time_src = plot_df["time_s"].to_numpy(dtype=np.float64)
-            plot_current_src = plot_df["current_A"].to_numpy(dtype=np.float64) * 1000.0
-
             plot_time, plot_current = limit_plot_points_peak_preserving(
-                plot_time_src,
-                plot_current_src,
+                plot_df["time_s"].to_numpy(dtype=np.float64),
+                plot_df["current_A"].to_numpy(dtype=np.float64) * 1000.0,
                 max_points=args.plot_max_points
             )
 
@@ -814,14 +845,14 @@ def main():
 
             ax_current.relim()
 
-            if args.window_s > 0 and len(time_data) > 1:
-                tmax = time_data[-1]
-                tmin = max(time_data[0], tmax - args.window_s)
+            if args.window_s > 0 and total_points > 1:
+                tmax = last_time_s
+                tmin = max(first_time_s, tmax - args.window_s)
 
                 ax_current.set_xlim(tmin, tmax)
                 ax_current.autoscale_view(scalex=False, scaley=True)
 
-            elif args.duration_ms > 0 and len(time_data) > 1:
+            elif args.duration_ms > 0 and total_points > 1:
                 tmin = 0.0
                 tmax = args.duration_ms / 1000.0
 
@@ -834,26 +865,19 @@ def main():
             fig.canvas.draw()
             fig.canvas.flush_events()
 
-        elapsed_s = time_data[-1] - time_data[0] if len(time_data) > 1 else 0.0
+        elapsed_s = last_time_s - first_time_s if total_points > 1 else 0.0
 
         if elapsed_s > 0:
-            avg_current_mA = np_trapezoid(
-                np.asarray(current_data, dtype=np.float64),
-                np.asarray(time_data, dtype=np.float64)
-            ) / elapsed_s
-
-            avg_power_mW = np_trapezoid(
-                np.asarray(power_data, dtype=np.float64),
-                np.asarray(time_data, dtype=np.float64)
-            ) / elapsed_s
+            avg_current_mA = current_integral_mA_s / elapsed_s
+            avg_power_mW = (last_energy_J * 1000.0) / elapsed_s
         else:
             avg_current_mA = 0.0
             avg_power_mW = 0.0
 
         status_msg = (
-            f"\rPts={len(time_data)} | "
-            f"t={time_data[-1]:.2f}s | "
-            f"I={current_data[-1]:.3f}mA | "
+            f"\rPts={total_points} | "
+            f"t={last_time_s:.2f}s | "
+            f"I={last_current_mA:.3f}mA | "
             f"Iavg={avg_current_mA:.3f}mA | "
             f"E={last_energy_J * 1000.0:.3f}mJ | "
             f"Pavg={avg_power_mW:.3f}mW"
@@ -877,16 +901,16 @@ def main():
         else:
             plt.pause(args.refresh_ms / 1000.0)
 
-    print("Real time plot finished.")
+    print("\n\nReal time plot finished.")
 
-    if len(time_data) >= 2 and not state["final_total_printed"]:
+    if total_points >= 2 and first_time_s is not None and last_time_s is not None and not state["final_total_printed"]:
         analyze_interval(
-            time_data[0],
-            time_data[-1],
+            first_time_s,
+            last_time_s,
             label="FINAL_TOTAL",
         )
     else:
-        if len(time_data) < 2:
+        if total_points < 2:
             print("There is still not enough data to calculate the total consumption.")
 
 
