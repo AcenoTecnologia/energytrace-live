@@ -236,7 +236,7 @@ python run_energytrace_live.py \
 | `--downsample` | Downsample window in milliseconds used only for plotting. If you are experiencing performance issues, try increasing this value. | 0.01 |
 | `--refresh` | Live plot refresh time in milliseconds. | 10 |
 | `--window` | Visible plot window in seconds. Use `0` to show the full capture. | 0 |
-| `--max-points` | Maximum number of points displayed in the live plot. | 2000 |
+| `--max-points` | Maximum number of points displayed in the live plot. Minimum allowed value is `2`; larger values show more detail but may reduce performance. | 2000 |
 | `--et-mode` | EnergyTrace mode passed to `stune`. Usually `et`, the `et++` mode may not work for some devices. | et |
 
 Both `--ccs` and `--config` settings are required. They can be provided in `config.local.json`, an explicit `--settings` file, or with the `--ccs` and `--config`/`--target-config` command-line options.

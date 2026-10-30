@@ -75,6 +75,9 @@ def configure_window(fig, width=1200, height=650):
 
 # Limita o número de pontos plotados, preservando os picos da corrente.
 def limit_plot_points_peak_preserving(x, current, max_points=10000):
+    if max_points < 2:
+        raise ValueError("max_points must be at least 2.")
+
     n = len(x)
 
     if n <= max_points:
@@ -406,6 +409,10 @@ def main():
     parser.add_argument("--duration-ms", type=float, default=0.0)
 
     args = parser.parse_args()
+
+    if args.plot_max_points < 2:
+        parser.error("--plot-max-points must be at least 2.")
+
     no_plot = args.no_plot == 1
 
     reader = LiveCsvReader(

@@ -618,7 +618,7 @@ def parse_args():
         "--max-points",
         type=int,
         default=None,
-        help="Maximum number of points displayed in the live plot."
+        help="Maximum number of points displayed in the live plot (minimum: 2)."
     )
 
     parser.add_argument(
@@ -665,6 +665,9 @@ def main() -> int:
     window_s = settings["window"]
     max_points = settings["max_points"]
     et_mode = settings["et_mode"]
+
+    if max_points < 2:
+        raise SystemExit("Maximum displayed plot points must be at least 2.")
 
     check_paths(
         ccs=ccs,
